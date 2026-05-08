@@ -1,0 +1,340 @@
+.container {
+  min-height: 100vh;
+  background: #f8f7f3;
+  color: #1a1a1a;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+  color: white;
+  padding: 100px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.headerContent {
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 300;
+  letter-spacing: 3px;
+  margin-bottom: 15px;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.subtitle {
+  font-size: 1.3rem;
+  font-weight: 300;
+  opacity: 0.9;
+  letter-spacing: 1px;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+/* Hero */
+.hero {
+  background: white;
+  padding: 80px 40px;
+  text-align: center;
+  border-bottom: 1px solid #e0dcd6;
+}
+
+.heroText h2 {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.heroText p {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.8;
+  font-weight: 300;
+}
+
+/* Fleet Section */
+.fleet {
+  padding: 100px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.fleetHeader {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.fleetHeader h2 {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+
+.fleetHeader p {
+  font-size: 1rem;
+  color: #999;
+  letter-spacing: 1px;
+}
+
+.carsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 40px;
+}
+
+.carCard {
+  background: white;
+  padding: 40px;
+  border: 1px solid #e0dcd6;
+  position: relative;
+  animation: slideUp 0.6s ease-out forwards;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.carCard:hover {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+  border-color: #d4af37;
+  transform: translateY(-5px);
+}
+
+.carIndex {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: #d4af37;
+  opacity: 0.3;
+}
+
+.carHeader {
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 15px;
+}
+
+.carName {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #1a1a1a;
+  margin-bottom: 5px;
+  letter-spacing: 0.5px;
+}
+
+.carYear {
+  font-size: 0.85rem;
+  color: #999;
+  font-weight: 300;
+}
+
+.carDescription {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  font-weight: 300;
+}
+
+.specs {
+  margin-bottom: 25px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.specRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: 0.9rem;
+}
+
+.specLabel {
+  color: #999;
+  font-weight: 400;
+}
+
+.specValue {
+  color: #1a1a1a;
+  font-weight: 500;
+  text-align: right;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 25px;
+}
+
+.feature {
+  font-size: 0.85rem;
+  color: #666;
+  padding: 8px 0;
+  font-weight: 300;
+}
+
+.feature::before {
+  content: '✓ ';
+  color: #d4af37;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.inquireBtn {
+  width: 100%;
+  padding: 14px;
+  background: #1a1a1a;
+  color: white;
+  border: 2px solid #1a1a1a;
+  border-radius: 2px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.inquireBtn:hover {
+  background: transparent;
+  color: #1a1a1a;
+}
+
+/* CTA Section */
+.cta {
+  background: #1e1e2e;
+  color: white;
+  padding: 80px 40px;
+  text-align: center;
+}
+
+.cta h2 {
+  font-size: 2rem;
+  font-weight: 300;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+}
+
+.cta p {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-bottom: 30px;
+  font-weight: 300;
+}
+
+.ctaButton {
+  padding: 15px 50px;
+  background: #d4af37;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 2px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ctaButton:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+}
+
+/* Footer */
+.footer {
+  background: #0f0f15;
+  color: #999;
+  padding: 40px;
+  text-align: center;
+  font-size: 0.9rem;
+  border-top: 1px solid #1a1a1a;
+}
+
+.footer p {
+  margin: 10px 0;
+  font-weight: 300;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .heroText h2 {
+    font-size: 1.8rem;
+  }
+
+  .carsGrid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .header {
+    padding: 60px 20px;
+  }
+
+  .fleet {
+    padding: 50px 20px;
+  }
+}
