@@ -130,6 +130,13 @@
   display: block;
 }
 
+.carImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .carContent {
   padding: 30px;
   flex: 1;
