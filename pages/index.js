@@ -2,6 +2,8 @@ import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import styles from '../styles/Home.module.css';
 
+const FORM_ENDPOINT = 'https://formspree.io/f/xyzabc123'; // Replace with actual Formspree ID
+
 const CARS = [
   { id: 1, name: 'Fiat 500', name_tr: 'Fiat 500', year: 2023, features: ['Bluetooth Audio', 'USB Charging', 'Air Conditioning'], features_tr: ['Bluetooth Ses', 'USB Sarj', 'Klima'], mileage: '12,450 km', fuelTank: '40L', transmission: 'Automatic', description: 'Compact and nimble. Perfect for exploring narrow streets.', description_tr: 'Kompakt ve cevik. Dar sokaklari kesfetmek icin mukemmel.', image: 'https://images.pexels.com/photos/416978/pexels-photo-416978.jpeg' },
   { id: 2, name: 'Toyota Yaris', name_tr: 'Toyota Yaris', year: 2023, features: ['Bluetooth Connectivity', 'Cruise Control', 'Rear Camera'], features_tr: ['Bluetooth Baglantisi', 'Hiz Sabitleyici', 'Arka Kamera'], mileage: '8,200 km', fuelTank: '45L', transmission: 'Manual', description: 'Reliable and fuel-efficient. Smooth ride on all terrain.', description_tr: 'Guvenilir ve yakıt tasarrufu. Tum arazi turlerinde duzgun surusler.', image: 'https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg' },
@@ -72,7 +74,67 @@ export default function Home() {
   const [langModalOpen, setLangModalOpen] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  const [formErrors, setFormErrors] = useState({});
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formSuccess, setFormSuccess] = useState(false);
+  const [imageLoading, setImageLoading] = useState({});
   const t = TEXT[lang];
+
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.name.trim()) errors.name = 'Name is required';
+    if (!formData.email.trim()) errors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = 'Invalid email';
+    if (!formData.phone.trim()) errors.phone = 'Phone is required';
+    return errors;
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    const errors = validateForm();
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormSubmitting(true);
+    try {
+      const response = await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+          car: selectedCar[lang === 'tr' ? 'name_tr' : 'name'],
+        }),
+      });
+
+      if (response.ok) {
+        setFormSuccess(true);
+        setFormData({ name: '', email: '', phone: '', message: '' });
+        setTimeout(() => {
+          setModalOpen(false);
+          setFormSuccess(false);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
 
   const handleSelectLanguage = (selectedLang) => {
     setLang(selectedLang);
@@ -92,9 +154,41 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Cyprus Road | Premium Car Rental</title>
-        <meta name="description" content="Premium car rental in Cyprus" />
+        <title>Cyprus Road | Premium Car Rental in Cyprus | Affordable & Reliable</title>
+        <meta name="description" content="Cyprus Road premium car rental service. Discover Cyprus with our fleet of luxury and economy cars. 24/7 availability, competitive rates, and bilingual support." />
+        <meta name="keywords" content="car rental Cyprus, luxury cars Cyprus, economy cars Cyprus, Cyprus Road rental, Paphos car rental, Larnaca car rental" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="author" content="Cyprus Road Premium Car Rental" />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:title" content="Cyprus Road | Premium Car Rental in Cyprus" />
+        <meta property="og:description" content="Premium car rental service in Cyprus with luxury and economy options. Book now for 24/7 service." />
+        <meta property="og:type" content="business.business" />
+        <meta property="og:url" content="https://cy-car-rental.vercel.app" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Cyprus Road Premium Car Rental" />
+        <link rel="canonical" href="https://cy-car-rental.vercel.app" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "Cyprus Road Premium Car Rental",
+            "image": "https://cy-car-rental.vercel.app/logo.png",
+            "description": "Premium car rental service in Cyprus offering luxury and economy vehicles",
+            "url": "https://cy-car-rental.vercel.app",
+            "telephone": "+357-XXXXXXX",
+            "areaServed": "CY",
+            "priceRange": "$$",
+            "sameAs": [
+              "https://www.google.com/maps",
+              "https://www.facebook.com/cyprusroad"
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Cyprus",
+              "addressCountry": "CY"
+            }
+          })}
+        </script>
       </Head>
 
       <div className={styles.container}>
@@ -142,23 +236,72 @@ export default function Home() {
         {modalOpen && (
           <div className={styles.modal}>
             <div className={styles.modalContent}>
-              <button className={styles.closeBtn} onClick={() => setModalOpen(false)}>
+              <button className={styles.closeBtn} onClick={() => setModalOpen(false)} disabled={formSubmitting}>
                 X
               </button>
               <h3>{t.modalTitle}</h3>
               <p>{t.modalText}</p>
-              <form className={styles.form}>
-                <input type="text" placeholder={t.name} required />
-                <input type="email" placeholder={t.email} required />
-                <input type="tel" placeholder={t.phone} required />
-                <textarea placeholder={t.message}></textarea>
-                <button type="button" className={styles.submitBtn} onClick={() => setModalOpen(false)}>
-                  {t.send}
-                </button>
-              </form>
-              <button className={styles.whatsappBtn} onClick={handleWhatsApp}>
-                {t.whatsapp}
-              </button>
+              {formSuccess ? (
+                <div className={styles.successMessage}>
+                  ✓ {lang === 'en' ? 'Your inquiry has been sent successfully!' : 'Sorgunuz başarıyla gönderildi!'}
+                </div>
+              ) : (
+                <>
+                  <form className={styles.form} onSubmit={handleFormSubmit}>
+                    <div className={styles.formGroup}>
+                      <input
+                        type="text"
+                        name="name"
+                        placeholder={t.name}
+                        value={formData.name}
+                        onChange={handleFormChange}
+                        className={formErrors.name ? styles.inputError : ''}
+                      />
+                      {formErrors.name && <span className={styles.errorText}>{formErrors.name}</span>}
+                    </div>
+                    <div className={styles.formGroup}>
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder={t.email}
+                        value={formData.email}
+                        onChange={handleFormChange}
+                        className={formErrors.email ? styles.inputError : ''}
+                      />
+                      {formErrors.email && <span className={styles.errorText}>{formErrors.email}</span>}
+                    </div>
+                    <div className={styles.formGroup}>
+                      <input
+                        type="tel"
+                        name="phone"
+                        placeholder={t.phone}
+                        value={formData.phone}
+                        onChange={handleFormChange}
+                        className={formErrors.phone ? styles.inputError : ''}
+                      />
+                      {formErrors.phone && <span className={styles.errorText}>{formErrors.phone}</span>}
+                    </div>
+                    <div className={styles.formGroup}>
+                      <textarea
+                        name="message"
+                        placeholder={t.message}
+                        value={formData.message}
+                        onChange={handleFormChange}
+                      ></textarea>
+                    </div>
+                    <button
+                      type="submit"
+                      className={styles.submitBtn}
+                      disabled={formSubmitting}
+                    >
+                      {formSubmitting ? (lang === 'en' ? 'Sending...' : 'Gönderiliyor...') : t.send}
+                    </button>
+                  </form>
+                  <button className={styles.whatsappBtn} onClick={handleWhatsApp} disabled={formSubmitting}>
+                    {t.whatsapp}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -192,7 +335,15 @@ export default function Home() {
               return (
                 <div key={car.id} className={styles.carCard} style={{ animationDelay: `${index * 0.1}s` }}>
                   <div className={styles.carImage}>
-                    <img src={car.image} alt={carName} className={styles.carImg} />
+                    {imageLoading[car.id] && <div className={styles.skeleton}></div>}
+                    <img
+                      src={car.image}
+                      alt={`${carName} ${car.year} - Cyprus rental car`}
+                      className={styles.carImg}
+                      onLoad={() => setImageLoading(prev => ({ ...prev, [car.id]: false }))}
+                      onError={() => setImageLoading(prev => ({ ...prev, [car.id]: false }))}
+                      style={{ display: imageLoading[car.id] ? 'none' : 'block' }}
+                    />
                   </div>
                   <div className={styles.carIndex}>{String(car.id).padStart(2, '0')}</div>
 
