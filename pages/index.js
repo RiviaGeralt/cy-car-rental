@@ -12,7 +12,7 @@ const CARS = [
 
 const TEXT = {
   en: {
-    title: 'Cyprus Road',
+    title: 'Cyprus Road - UPDATED',
     subtitle: 'Discover Cyprus in a car built for the journey',
     story: 'Every journey tells a story',
     confidence: 'Our premium fleet is maintained to the highest standards. Drive with confidence. Explore with freedom.',
@@ -25,7 +25,7 @@ const TEXT = {
     mileage: 'Mileage',
     fuelTank: 'Fuel Tank',
     transmission: 'Transmission',
-    footer: 'Cyprus Road Premium Car Rental',
+    footer: 'Cyprus Road - UPDATED Premium Car Rental',
     footerDetails: '📍 Across Cyprus | 📞 Available 24/7 | 🗺️ Find us on Google Maps',
     modalTitle: 'Interested in this car?',
     modalText: 'Tell us your details and we will get back to you shortly.',
@@ -82,7 +82,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Cyprus Road | Premium Car Rental</title>
+        <title>Cyprus Road - UPDATED | Premium Car Rental</title>
         <meta name="description" content="Discover your perfect Cyprus adventure with our premium car rental fleet" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
