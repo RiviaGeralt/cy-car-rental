@@ -591,7 +591,9 @@
 }
 
 /* Button Disabled State */
-button:disabled {
+.submitBtn:disabled,
+.whatsappBtn:disabled,
+.closeBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
