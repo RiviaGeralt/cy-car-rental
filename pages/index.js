@@ -98,22 +98,46 @@ export default function Home() {
       </Head>
 
       <div className={styles.container}>
+        {/* Language Modal - appears on first load */}
         {langModalOpen && (
-          <div className={styles.langModal}>
-            <div className={styles.langModalContent}>
+          <div className={styles.langModalOverlay}>
+            <div className={styles.langModalPopup}>
+              <div className={styles.langModalHeader}>
+                <svg className={styles.googleLogo} viewBox="0 0 272 92" xmlns="http://www.w3.org/2000/svg">
+                  <text x="30" y="60" fontSize="32" fontWeight="bold" fill="#1f2937">Translate</text>
+                </svg>
+              </div>
               <h2>{TEXT.en.selectLanguage}</h2>
               <p>{TEXT.en.chooseLanguage}</p>
               <div className={styles.langModalButtons}>
-                <button className={styles.langModalButton} onClick={() => handleSelectLanguage('en')}>
+                <button className={styles.langModalBtn} onClick={() => handleSelectLanguage('en')}>
                   English
                 </button>
-                <button className={styles.langModalButton} onClick={() => handleSelectLanguage('tr')}>
+                <button className={styles.langModalBtn} onClick={() => handleSelectLanguage('tr')}>
                   Turkce
                 </button>
               </div>
             </div>
           </div>
         )}
+
+        {/* Side Language Switcher - always visible after modal closes */}
+        <div className={styles.sideLangSwitcher}>
+          <button
+            className={`${styles.sideLangBtn} ${lang === 'en' ? styles.active : ''}`}
+            onClick={() => setLang('en')}
+            title="English"
+          >
+            EN
+          </button>
+          <button
+            className={`${styles.sideLangBtn} ${lang === 'tr' ? styles.active : ''}`}
+            onClick={() => setLang('tr')}
+            title="Turkce"
+          >
+            TR
+          </button>
+        </div>
 
         {modalOpen && (
           <div className={styles.modal}>
