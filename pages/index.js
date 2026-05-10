@@ -196,9 +196,9 @@ export default function Home() {
                     <Image
                       src={car.image}
                       alt={carName}
-                      width={500}
-                      height={400}
-                      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      style={{ objectFit: 'cover' }}
                       priority={index < 2}
                     />
                   </div>
