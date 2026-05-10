@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '../styles/Home.module.css';
 
 const CARS = [
@@ -35,6 +35,8 @@ const TEXT = {
     message: 'Message (optional)',
     send: 'Send Inquiry',
     whatsapp: 'Message on WhatsApp',
+    selectLanguage: 'Select Language',
+    chooseLanguage: 'Choose your preferred language',
   },
   tr: {
     title: 'Kibris Yolu',
@@ -60,14 +62,22 @@ const TEXT = {
     message: 'Mesaj (Isteğe bağlı)',
     send: 'Gönder',
     whatsapp: 'WhatsApp ta Mesaj Gönder',
+    selectLanguage: 'Dil Secin',
+    chooseLanguage: 'Tercih ettiginiz dili secin',
   },
 };
 
 export default function Home() {
   const [lang, setLang] = useState('en');
+  const [langModalOpen, setLangModalOpen] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
   const t = TEXT[lang];
+
+  const handleSelectLanguage = (selectedLang) => {
+    setLang(selectedLang);
+    setLangModalOpen(false);
+  };
 
   const handleInquire = (car) => {
     setSelectedCar(car);
@@ -88,14 +98,22 @@ export default function Home() {
       </Head>
 
       <div className={styles.container}>
-        <div className={styles.langSwitcher}>
-          <button className={`${styles.langBtn} ${lang === 'en' ? styles.active : ''}`} onClick={() => setLang('en')}>
-            EN
-          </button>
-          <button className={`${styles.langBtn} ${lang === 'tr' ? styles.active : ''}`} onClick={() => setLang('tr')}>
-            TR
-          </button>
-        </div>
+        {langModalOpen && (
+          <div className={styles.langModal}>
+            <div className={styles.langModalContent}>
+              <h2>{TEXT.en.selectLanguage}</h2>
+              <p>{TEXT.en.chooseLanguage}</p>
+              <div className={styles.langModalButtons}>
+                <button className={styles.langModalButton} onClick={() => handleSelectLanguage('en')}>
+                  English
+                </button>
+                <button className={styles.langModalButton} onClick={() => handleSelectLanguage('tr')}>
+                  Turkce
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {modalOpen && (
           <div className={styles.modal}>
@@ -154,39 +172,41 @@ export default function Home() {
                   </div>
                   <div className={styles.carIndex}>{String(car.id).padStart(2, '0')}</div>
 
-                  <div className={styles.carHeader}>
-                    <h3 className={styles.carName}>{carName}</h3>
-                    <p className={styles.carYear}>{car.year}</p>
-                  </div>
-
-                  <p className={styles.carDescription}>{carDesc}</p>
-
-                  <div className={styles.specs}>
-                    <div className={styles.specRow}>
-                      <span className={styles.specLabel}>{t.mileage}</span>
-                      <span className={styles.specValue}>{car.mileage}</span>
+                  <div className={styles.carContent}>
+                    <div className={styles.carHeader}>
+                      <h3 className={styles.carName}>{carName}</h3>
+                      <p className={styles.carYear}>{car.year}</p>
                     </div>
-                    <div className={styles.specRow}>
-                      <span className={styles.specLabel}>{t.fuelTank}</span>
-                      <span className={styles.specValue}>{car.fuelTank}</span>
-                    </div>
-                    <div className={styles.specRow}>
-                      <span className={styles.specLabel}>{t.transmission}</span>
-                      <span className={styles.specValue}>{car.transmission}</span>
-                    </div>
-                  </div>
 
-                  <div className={styles.features}>
-                    {carFeatures.map((feature, idx) => (
-                      <span key={idx} className={styles.feature}>
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
+                    <p className={styles.carDescription}>{carDesc}</p>
 
-                  <button className={styles.inquireBtn} onClick={() => handleInquire(car)}>
-                    {t.inquire}
-                  </button>
+                    <div className={styles.specs}>
+                      <div className={styles.specRow}>
+                        <span className={styles.specLabel}>{t.mileage}</span>
+                        <span className={styles.specValue}>{car.mileage}</span>
+                      </div>
+                      <div className={styles.specRow}>
+                        <span className={styles.specLabel}>{t.fuelTank}</span>
+                        <span className={styles.specValue}>{car.fuelTank}</span>
+                      </div>
+                      <div className={styles.specRow}>
+                        <span className={styles.specLabel}>{t.transmission}</span>
+                        <span className={styles.specValue}>{car.transmission}</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.features}>
+                      {carFeatures.map((feature, idx) => (
+                        <span key={idx} className={styles.feature}>
+                          {feature}
+                        </span>
+                      ))}
+                    </div>
+
+                    <button className={styles.inquireBtn} onClick={() => handleInquire(car)}>
+                      {t.inquire}
+                    </button>
+                  </div>
                 </div>
               );
             })}
