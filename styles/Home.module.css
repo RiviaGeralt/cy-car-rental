@@ -126,13 +126,7 @@
   height: 250px;
   overflow: hidden;
   background: #f0f0f0;
-}
-
-.carImage img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  position: relative;
 }
 
 .carContent {

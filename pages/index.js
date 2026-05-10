@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import styles from '../styles/Home.module.css';
 
@@ -192,7 +193,14 @@ export default function Home() {
               return (
                 <div key={car.id} className={styles.carCard} style={{ animationDelay: `${index * 0.1}s` }}>
                   <div className={styles.carImage}>
-                    <img src={car.image} alt={carName} />
+                    <Image
+                      src={car.image}
+                      alt={carName}
+                      width={500}
+                      height={400}
+                      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                      priority={index < 2}
+                    />
                   </div>
                   <div className={styles.carIndex}>{String(car.id).padStart(2, '0')}</div>
 
