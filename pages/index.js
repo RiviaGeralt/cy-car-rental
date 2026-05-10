@@ -3,16 +3,16 @@ import { useState } from 'react';
 import styles from '../styles/Home.module.css';
 
 const CARS = [
-  { id: 1, name: 'Fiat 500', name_tr: 'Fiat 500', year: 2023, features: ['Bluetooth Audio', 'USB Charging', 'Air Conditioning'], features_tr: ['Bluetooth Ses', 'USB Şarj', 'Klima'], mileage: '12,450 km', fuelTank: '40L', transmission: 'Automatic', description: 'Compact and nimble. Perfect for exploring narrow streets.', description_tr: 'Kompakt ve çevik. Dar sokakları keşfetmek için mükemmel.', image: 'https://images.unsplash.com/photo-1552519507-da3effff991c?w=500&h=400&fit=crop' },
-  { id: 2, name: 'Toyota Yaris', name_tr: 'Toyota Yaris', year: 2023, features: ['Bluetooth Connectivity', 'Cruise Control', 'Rear Camera'], features_tr: ['Bluetooth Bağlantı', 'Hız Sabitleyici', 'Arka Kamera'], mileage: '8,200 km', fuelTank: '45L', transmission: 'Manual', description: 'Reliable and fuel-efficient. Smooth ride on all terrain.', description_tr: 'Güvenilir ve yakıt tasarruflu. Tüm arazi türlerinde düzgün sürüş.', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=400&fit=crop' },
-  { id: 3, name: 'Mercedes C-Class', name_tr: 'Mercedes C-Sınıfı', year: 2023, features: ['Premium Audio', 'Navigation System', 'Leather Seats', 'Sunroof'], features_tr: ['Premium Ses Sistemi', 'Navigasyon Sistemi', 'Deri Koltuklar', 'Açılır Çatı'], mileage: '5,100 km', fuelTank: '66L', transmission: 'Automatic', description: 'Luxury and comfort. Experience Cyprus in style.', description_tr: 'Lüks ve rahatlık. Kıbrıs'ı stilinizle keşfedin.', image: 'https://images.unsplash.com/photo-1554215286-94a9a47c3e1f?w=500&h=400&fit=crop' },
-  { id: 4, name: 'Honda CR-V', name_tr: 'Honda CR-V', year: 2022, features: ['Apple CarPlay', 'All-Wheel Drive', 'Panoramic Sunroof', 'Bluetooth'], features_tr: ['Apple CarPlay', 'Tüm Tekerlek İtiş', 'Panoramik Açılır Çatı', 'Bluetooth'], mileage: '18,900 km', fuelTank: '58L', transmission: 'Automatic', description: 'Spacious and capable. Adventure-ready.', description_tr: 'Geniş ve güçlü. Macera için hazır.', image: 'https://images.unsplash.com/photo-1606660265514-358ebbd288d0?w=500&h=400&fit=crop' },
-  { id: 5, name: 'Volkswagen Golf', name_tr: 'Volkswagen Golf', year: 2023, features: ['Climate Control', 'Keyless Entry', 'Bluetooth', 'Touchscreen'], features_tr: ['İklim Kontrolü', 'Anahtarsız Giriş', 'Bluetooth', 'Dokunmatik Ekran'], mileage: '9,750 km', fuelTank: '50L', transmission: 'Automatic', description: 'Modern engineering meets everyday comfort.', description_tr: 'Modern mühendislik günlük rahatlıkla buluşuyor.', image: 'https://images.unsplash.com/photo-1590362891990-f8ddb41d3dbf?w=500&h=400&fit=crop' },
+  { id: 1, name: 'Fiat 500', name_tr: 'Fiat 500', year: 2023, features: ['Bluetooth Audio', 'USB Charging', 'Air Conditioning'], features_tr: ['Bluetooth Ses', 'USB Sarj', 'Klima'], mileage: '12,450 km', fuelTank: '40L', transmission: 'Automatic', description: 'Compact and nimble. Perfect for exploring narrow streets.', description_tr: 'Kompakt ve cevik. Dar sokaklari kesfetmek icin mukemmel.', image: 'https://images.unsplash.com/photo-1552519507-da3effff991c?w=500&h=400&fit=crop' },
+  { id: 2, name: 'Toyota Yaris', name_tr: 'Toyota Yaris', year: 2023, features: ['Bluetooth Connectivity', 'Cruise Control', 'Rear Camera'], features_tr: ['Bluetooth Baglantisi', 'Hiz Sabitleyici', 'Arka Kamera'], mileage: '8,200 km', fuelTank: '45L', transmission: 'Manual', description: 'Reliable and fuel-efficient. Smooth ride on all terrain.', description_tr: 'Guvenilir ve yakıt tasarrufu. Tum arazi turlerinde duzgun surusler.', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=400&fit=crop' },
+  { id: 3, name: 'Mercedes C-Class', name_tr: 'Mercedes C-Sinifi', year: 2023, features: ['Premium Audio', 'Navigation System', 'Leather Seats', 'Sunroof'], features_tr: ['Premium Ses Sistemi', 'Navigasyon Sistemi', 'Deri Koltuklar', 'Acilir Cati'], mileage: '5,100 km', fuelTank: '66L', transmission: 'Automatic', description: 'Luxury and comfort. Experience Cyprus in style.', description_tr: 'Luxs ve rahatlık. Kibrisin stilinizle kesfet.', image: 'https://images.unsplash.com/photo-1554215286-94a9a47c3e1f?w=500&h=400&fit=crop' },
+  { id: 4, name: 'Honda CR-V', name_tr: 'Honda CR-V', year: 2022, features: ['Apple CarPlay', 'All-Wheel Drive', 'Panoramic Sunroof', 'Bluetooth'], features_tr: ['Apple CarPlay', 'Tum Tekerlek Itis', 'Panoramik Acilir Cati', 'Bluetooth'], mileage: '18,900 km', fuelTank: '58L', transmission: 'Automatic', description: 'Spacious and capable. Adventure-ready.', description_tr: 'Genis ve guclu. Macera icin hazir.', image: 'https://images.unsplash.com/photo-1606660265514-358ebbd288d0?w=500&h=400&fit=crop' },
+  { id: 5, name: 'Volkswagen Golf', name_tr: 'Volkswagen Golf', year: 2023, features: ['Climate Control', 'Keyless Entry', 'Bluetooth', 'Touchscreen'], features_tr: ['Iklim Kontrolu', 'Anahtarsiz Giriş', 'Bluetooth', 'Dokunmatik Ekran'], mileage: '9,750 km', fuelTank: '50L', transmission: 'Automatic', description: 'Modern engineering meets everyday comfort.', description_tr: 'Modern muhendislik gunluk rahatlıkla bulusuyor.', image: 'https://images.unsplash.com/photo-1590362891990-f8ddb41d3dbf?w=500&h=400&fit=crop' },
 ];
 
 const TEXT = {
   en: {
-    title: 'Cyprus Road - UPDATED',
+    title: 'Cyprus Road',
     subtitle: 'Discover Cyprus in a car built for the journey',
     story: 'Every journey tells a story',
     confidence: 'Our premium fleet is maintained to the highest standards. Drive with confidence. Explore with freedom.',
@@ -25,8 +25,8 @@ const TEXT = {
     mileage: 'Mileage',
     fuelTank: 'Fuel Tank',
     transmission: 'Transmission',
-    footer: 'Cyprus Road - UPDATED Premium Car Rental',
-    footerDetails: '📍 Across Cyprus | 📞 Available 24/7 | 🗺️ Find us on Google Maps',
+    footer: 'Cyprus Road Premium Car Rental',
+    footerDetails: 'Across Cyprus | Available 24/7 | Find us on Google Maps',
     modalTitle: 'Interested in this car?',
     modalText: 'Tell us your details and we will get back to you shortly.',
     name: 'Full Name',
@@ -37,27 +37,27 @@ const TEXT = {
     whatsapp: 'Message on WhatsApp',
   },
   tr: {
-    title: 'Kıbrıs Yolu',
-    subtitle: 'Yolculuk için tasarlanmış bir araçta Kıbrıs'ı keşfedin',
-    story: 'Her yolculuk bir hikaye anlatır',
-    confidence: 'Premium araç filomuz en yüksek standartlarda bakımı yapılır. Güvenle sürün. Özgürce keşfedin.',
-    fleet: 'Araç Filomuz',
-    fleetSubtitle: 'Dikkatle bakımı yapılmış. Maceranıza hazır.',
+    title: 'Kibris Yolu',
+    subtitle: 'Kibrisin aracinizla kesfet',
+    story: 'Her seyahat bir hikaye',
+    confidence: 'Premium arac filomuz en yuksek standartlarda bakımlanır.',
+    fleet: 'Arac Filomuz',
+    fleetSubtitle: 'Bakımı yapılmış. Maceranıza hazır.',
     inquire: 'Bilgi Al',
-    cta: 'Kıbrıs macerası için hazır mısınız?',
-    ctaSub: 'Bugün bize ulaşın. Sizi mükemmel arabada olmasını sağlayacağız.',
-    ctaBtn: 'İletişime Geç',
+    cta: 'Kibris macerası için hazır?',
+    ctaSub: 'Bugün bize ulaşın.',
+    ctaBtn: 'Iletişime Geç',
     mileage: 'Kilometre',
     fuelTank: 'Yakıt Tankı',
     transmission: 'Vites',
-    footer: 'Kıbrıs Yolu Premium Araç Kiralama',
-    footerDetails: '📍 Kıbrıs çapında | 📞 24/7 Açık | 🗺️ Google Haritalar'da bizi bulun',
+    footer: 'Kibris Yolu Premium Arac Kiralama',
+    footerDetails: 'Kibris capında | 24/7 Acık | Google Haritalar',
     modalTitle: 'Bu arabaya ilgi duyuyor musunuz?',
-    modalText: 'Bilgilerinizi bize söyleyin ve kısa sürede size geri dönüş yapacağız.',
+    modalText: 'Bilgilerinizi bize söyleyin.',
     name: 'Ad Soyad',
     email: 'E-posta',
     phone: 'Telefon',
-    message: 'Mesaj (İsteğe bağlı)',
+    message: 'Mesaj (Isteğe bağlı)',
     send: 'Gönder',
     whatsapp: 'WhatsApp ta Mesaj Gönder',
   },
@@ -82,8 +82,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Cyprus Road - UPDATED | Premium Car Rental</title>
-        <meta name="description" content="Discover your perfect Cyprus adventure with our premium car rental fleet" />
+        <title>Cyprus Road | Premium Car Rental</title>
+        <meta name="description" content="Premium car rental in Cyprus" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -101,7 +101,7 @@ export default function Home() {
           <div className={styles.modal}>
             <div className={styles.modalContent}>
               <button className={styles.closeBtn} onClick={() => setModalOpen(false)}>
-                ✕
+                X
               </button>
               <h3>{t.modalTitle}</h3>
               <p>{t.modalText}</p>
@@ -115,7 +115,7 @@ export default function Home() {
                 </button>
               </form>
               <button className={styles.whatsappBtn} onClick={handleWhatsApp}>
-                💬 {t.whatsapp}
+                {t.whatsapp}
               </button>
             </div>
           </div>
@@ -179,7 +179,7 @@ export default function Home() {
                   <div className={styles.features}>
                     {carFeatures.map((feature, idx) => (
                       <span key={idx} className={styles.feature}>
-                        ✓ {feature}
+                        {feature}
                       </span>
                     ))}
                   </div>
