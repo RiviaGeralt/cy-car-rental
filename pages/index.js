@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import { useState, useEffect } from 'react';
+import Script from 'next/script';
 import styles from '../styles/Home.module.css';
 
 // Formspree email backend — Sends inquiries to majd.bannoura123@hotmail.com
@@ -256,6 +257,20 @@ export default function Home() {
           })}
         </script>
       </Head>
+
+      {/* Google Analytics - Replace YOUR_GA_ID with your actual Google Analytics ID */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-XXXXXXXXXX');
+        `}
+      </Script>
 
       <div className={styles.container}>
         {/* Language Modal - appears on first load */}

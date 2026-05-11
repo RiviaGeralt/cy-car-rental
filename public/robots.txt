@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cy-rental-work.vercel.app/sitemap.xml
+
+# Block bad bots
+User-agent: MJ12bot
+User-agent: AhrefsBot
+User-agent: SemrushBot
+Disallow: /
+
+# Block admin/private
+Disallow: /admin/
+Disallow: /.next/
