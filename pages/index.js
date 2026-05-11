@@ -2,7 +2,11 @@ import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import styles from '../styles/Home.module.css';
 
-const FORM_ENDPOINT = 'https://formspree.io/f/xyzabc123'; // Replace with actual Formspree ID
+// Formspree email backend — Sends inquiries to majd.bannoura123@hotmail.com
+const FORM_ENDPOINT = 'https://formspree.io/f/mqenwqzo';
+
+// WHATSAPP NUMBER - Business contact
+const WHATSAPP_NUMBER = '+970594198211';
 
 const CARS = [
   { id: 1, name: 'Fiat 500', name_tr: 'Fiat 500', year: 2023, features: ['Bluetooth Audio', 'USB Charging', 'Air Conditioning'], features_tr: ['Bluetooth Ses', 'USB Sarj', 'Klima'], mileage: '12,450 km', fuelTank: '40L', transmission: 'Automatic', description: 'Compact and nimble. Perfect for exploring narrow streets.', description_tr: 'Kompakt ve cevik. Dar sokaklari kesfetmek icin mukemmel.', image: 'https://images.pexels.com/photos/416978/pexels-photo-416978.jpeg' },
@@ -148,7 +152,7 @@ export default function Home() {
 
   const handleWhatsApp = () => {
     const message = `Hi, I am interested in the ${selectedCar[lang === 'tr' ? 'name_tr' : 'name']}`;
-    window.open(`https://wa.me/1234567890?text=${encodeURIComponent(message)}`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`);
   };
 
   return (
