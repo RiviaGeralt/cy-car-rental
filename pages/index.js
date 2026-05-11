@@ -483,6 +483,8 @@ export default function Home() {
 
           <div className={styles.benefitsGrid}>
             {BENEFITS.map((benefit) => {
+              console.log('BENEFITS map rendering, benefit.id:', benefit.id, 'lang:', lang, 'headline_tr:', benefit.headline_tr);
+
               // TEST: Use hard-coded Turkish for benefit 1 ONLY to see if lang changes propagate
               let testHeadline = benefit.headline;
               if (benefit.id === 1) {
