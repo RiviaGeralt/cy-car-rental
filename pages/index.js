@@ -483,6 +483,12 @@ export default function Home() {
 
           <div className={styles.benefitsGrid}>
             {BENEFITS.map((benefit) => {
+              // TEST: Use hard-coded Turkish for benefit 1 ONLY to see if lang changes propagate
+              let testHeadline = benefit.headline;
+              if (benefit.id === 1) {
+                testHeadline = lang === 'tr' ? 'TEST_TURKISH' : 'TEST_ENGLISH';
+              }
+
               const benefitHeadline = lang === 'tr' ? benefit.headline_tr : benefit.headline;
               const benefitDesc = lang === 'tr' ? benefit.description_tr : benefit.description;
 
@@ -495,7 +501,7 @@ export default function Home() {
                   {benefit.icon === 'dollar-sign' && '💰'}
                 </div>
                 <h3 className={styles.benefitHeadline}>
-                  {benefitHeadline}
+                  {benefit.id === 1 ? testHeadline : benefitHeadline}
                 </h3>
                 <p className={styles.benefitDescription}>
                   {benefitDesc}
