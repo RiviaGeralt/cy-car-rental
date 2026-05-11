@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import Script from 'next/script';
 import styles from '../styles/Home.module.css';
 
-// Formspree email backend — Sends inquiries to majd.bannoura123@hotmail.com
-const FORM_ENDPOINT = 'https://formspree.io/f/mqenwqzo';
+// Form submission (server handles Formspree endpoint — hidden from browser)
+const FORM_ENDPOINT = '/api/submit-form';
 
 // WHATSAPP NUMBER - Business contact
 const WHATSAPP_NUMBER = '+970594198211';
@@ -142,7 +142,9 @@ export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  const [honeypot, setHoneypot] = useState('');
   const [formErrors, setFormErrors] = useState({});
+  const [formError, setFormError] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formSuccess, setFormSuccess] = useState(false);
   const [imageLoading, setImageLoading] = useState({});
@@ -150,19 +152,53 @@ export default function Home() {
 
   const validateForm = () => {
     const errors = {};
+
+    // Name validation
     if (!formData.name.trim()) errors.name = 'Name is required';
+    else if (formData.name.trim().length < 2) errors.name = 'Name must be at least 2 characters';
+
+    // Email validation (RFC-compliant)
     if (!formData.email.trim()) errors.email = 'Email is required';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = 'Invalid email';
+    else if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(formData.email)) {
+      errors.email = 'Invalid email format';
+    }
+
+    // Phone validation (Cyprus +357XXXXXXXX or international E.164)
     if (!formData.phone.trim()) errors.phone = 'Phone is required';
+    else {
+      const cleanPhone = formData.phone.replace(/\D/g, '');
+      const isCyprus = /^357[0-9]{8}$/.test(cleanPhone);
+      const isIntl = /^[1-9]\d{1,14}$/.test(cleanPhone);
+      if (!isCyprus && !isIntl) errors.phone = 'Enter valid phone (+357XXXXXXXX or international)';
+    }
+
+    // Message length validation
+    const MAX_MESSAGE_LENGTH = 500;
+    if (formData.message.length > MAX_MESSAGE_LENGTH) {
+      errors.message = `Message must be under ${MAX_MESSAGE_LENGTH} characters (${formData.message.length}/${MAX_MESSAGE_LENGTH})`;
+    }
+
     return errors;
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
     const errors = validateForm();
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      return;
+    }
+
+    // Honeypot detection (bot prevention)
+    if (honeypot) {
+      // Fake success to fool bot (don't actually submit)
+      setFormSuccess(true);
+      setTimeout(() => {
+        setModalOpen(false);
+        setFormSuccess(false);
+      }, 2000);
       return;
     }
 
@@ -180,16 +216,22 @@ export default function Home() {
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         setFormSuccess(true);
         setFormData({ name: '', email: '', phone: '', message: '' });
+        setFormErrors({});
         setTimeout(() => {
           setModalOpen(false);
           setFormSuccess(false);
-        }, 2000);
+        }, 3000);
+      } else {
+        setFormError(data.error || 'Submission failed. Please try again.');
       }
     } catch (error) {
       console.error('Form submission error:', error);
+      setFormError('Network error. Please check your connection and try again.');
     } finally {
       setFormSubmitting(false);
     }
@@ -328,7 +370,18 @@ export default function Home() {
                 </div>
               ) : (
                 <>
+                  {formError && <div className={styles.errorAlert}>{formError}</div>}
                   <form className={styles.form} onSubmit={handleFormSubmit}>
+                    {/* Honeypot field (hidden from users, catches bots) */}
+                    <input
+                      type="text"
+                      name="website"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      style={{ display: 'none' }}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
                     <div className={styles.formGroup}>
                       <input
                         type="text"
@@ -368,7 +421,10 @@ export default function Home() {
                         placeholder={t.message}
                         value={formData.message}
                         onChange={handleFormChange}
+                        maxLength={500}
                       ></textarea>
+                      <span className={styles.charCounter}>{formData.message.length}/500</span>
+                      {formErrors.message && <span className={styles.errorText}>{formErrors.message}</span>}
                     </div>
                     <button
                       type="submit"

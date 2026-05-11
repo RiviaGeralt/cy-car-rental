@@ -572,6 +572,25 @@
   margin-bottom: 20px;
 }
 
+.errorAlert {
+  padding: 15px;
+  background: #fadbd8;
+  color: #c0392b;
+  border-left: 4px solid #e74c3c;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.charCounter {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 5px;
+  text-align: right;
+  display: block;
+}
+
 /* Image Loading Skeleton */
 .skeleton {
   width: 100%;
