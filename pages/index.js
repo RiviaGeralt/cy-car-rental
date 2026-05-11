@@ -16,9 +16,60 @@ const CARS = [
   { id: 5, name: 'Volkswagen Golf', name_tr: 'Volkswagen Golf', year: 2023, features: ['Climate Control', 'Keyless Entry', 'Bluetooth', 'Touchscreen'], features_tr: ['Iklim Kontrolu', 'Anahtarsiz Giriş', 'Bluetooth', 'Dokunmatik Ekran'], mileage: '9,750 km', fuelTank: '50L', transmission: 'Automatic', description: 'Modern engineering meets everyday comfort.', description_tr: 'Modern muhendislik gunluk rahatlıkla bulusuyor.', image: 'https://images.pexels.com/photos/1024314/pexels-photo-1024314.jpeg' },
 ];
 
+const TESTIMONIALS = [
+  {
+    id: 1,
+    name: 'Ahmed',
+    location: 'Kyrenia',
+    rating: 5,
+    quote: 'Rented the Yaris for a week. Drove up to Bellapais Abbey, down to the harbour. Handled rough roads perfectly. Staff was helpful when I needed to add an extra day. Would rent again.'
+  },
+  {
+    id: 2,
+    name: 'Emma',
+    location: 'Famagusta',
+    rating: 5,
+    quote: 'Got the Honda CR-V. Went exploring with friends, hit some dirt roads toward the mountains. Car never had issues. Worth the price for peace of mind.'
+  },
+  {
+    id: 3,
+    name: 'Tariq',
+    location: 'Nicosia',
+    rating: 5,
+    quote: 'Needed a car for 3 days. Booked online, picked it up same day. The Fiat 500 was fun, easy to park in the old city. Their WhatsApp support actually replied within minutes. Solid experience.'
+  }
+];
+
+const BENEFITS = [
+  {
+    id: 1,
+    headline: 'Dependable Fleet',
+    description: 'Premium vehicles, regularly maintained. Drive without worry.',
+    icon: 'check-circle'
+  },
+  {
+    id: 2,
+    headline: 'Always Available',
+    description: 'Support when you need it. Via WhatsApp, call, or email.',
+    icon: 'phone'
+  },
+  {
+    id: 3,
+    headline: 'Premium Comfort',
+    description: 'Modern features, smooth rides, all terrain capable.',
+    icon: 'car'
+  },
+  {
+    id: 4,
+    headline: 'Fair Pricing',
+    description: 'Quality without premium markup. Adventure is affordable.',
+    icon: 'dollar-sign'
+  }
+];
+
 const TEXT = {
   en: {
-    title: 'Cyprus Road',
+    title: 'Start Your Cyprus Story',
     subtitle: 'Discover Cyprus in a car built for the journey',
     story: 'Every journey tells a story',
     confidence: 'Our premium fleet is maintained to the highest standards. Drive with confidence. Explore with freedom.',
@@ -45,7 +96,7 @@ const TEXT = {
     chooseLanguage: 'Choose your preferred language',
   },
   tr: {
-    title: 'Kibris Yolu',
+    title: 'Kibrisin Hikayenizi Yazin',
     subtitle: 'Kibrisin aracinizla kesfet',
     story: 'Her seyahat bir hikaye',
     confidence: 'Premium arac filomuz en yuksek standartlarda bakımlanır.',
@@ -389,6 +440,52 @@ export default function Home() {
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        <section className={styles.testimonials}>
+          <div className={styles.testimonialsHeader}>
+            <h2>{lang === 'en' ? 'What Our Guests Say' : 'Konuklarin Yorumlari'}</h2>
+          </div>
+
+          <div className={styles.testimonialGrid}>
+            {TESTIMONIALS.map((testimonial) => (
+              <div key={testimonial.id} className={styles.testimonialCard}>
+                <div className={styles.testimonialHeader}>
+                  <div>
+                    <h3 className={styles.testimonialName}>{testimonial.name}</h3>
+                    <p className={styles.testimonialLocation}>{testimonial.location}</p>
+                  </div>
+                  <div className={styles.testimonialRating}>
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <span key={i} className={styles.star}>⭐</span>
+                    ))}
+                  </div>
+                </div>
+                <p className={styles.testimonialQuote}>{testimonial.quote}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.benefits}>
+          <div className={styles.benefitsHeader}>
+            <h2>{lang === 'en' ? 'Why Choose Cyprus Road' : 'Neden Cyprus Road'}</h2>
+          </div>
+
+          <div className={styles.benefitsGrid}>
+            {BENEFITS.map((benefit) => (
+              <div key={benefit.id} className={styles.benefitCard}>
+                <div className={styles.benefitIcon}>
+                  {benefit.icon === 'check-circle' && '✓'}
+                  {benefit.icon === 'phone' && '📞'}
+                  {benefit.icon === 'car' && '🚗'}
+                  {benefit.icon === 'dollar-sign' && '💰'}
+                </div>
+                <h3 className={styles.benefitHeadline}>{benefit.headline}</h3>
+                <p className={styles.benefitDescription}>{benefit.description}</p>
+              </div>
+            ))}
           </div>
         </section>
 
