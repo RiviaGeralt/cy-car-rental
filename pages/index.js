@@ -529,3 +529,8 @@ export default function Home() {
     </>
   );
 }
+
+// Force dynamic rendering (disable static export) so lang-based translations work
+export const getServerSideProps = async () => ({
+  props: {},
+});
