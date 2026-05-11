@@ -481,6 +481,8 @@ export default function Home() {
             <h2>{lang === 'en' ? 'Why Choose Cyprus Road' : 'Neden Cyprus Road'}</h2>
           </div>
 
+          {console.log('BEFORE BENEFITS.map - BENEFITS array:', BENEFITS, 'lang:', lang)}
+
           <div className={styles.benefitsGrid}>
             {BENEFITS.map((benefit) => {
               console.log('BENEFITS map rendering, benefit.id:', benefit.id, 'lang:', lang, 'headline_tr:', benefit.headline_tr);
