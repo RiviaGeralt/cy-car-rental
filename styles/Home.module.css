@@ -97,6 +97,14 @@
   letter-spacing: 1px;
 }
 
+.pricingHighlight {
+  margin-top: 20px;
+  font-size: 1.3rem;
+  color: #d4af37;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
 .carsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -287,6 +295,33 @@
   box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
 }
 
+.ctaButtons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ctaButtonSecondary {
+  padding: 15px 50px;
+  background: transparent;
+  color: white;
+  border: 2px solid #d4af37;
+  border-radius: 2px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ctaButtonSecondary:hover {
+  background: #d4af37;
+  color: #1a1a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+}
+
 /* Footer */
 .footer {
   background: #0f0f15;
@@ -295,6 +330,24 @@
   text-align: center;
   font-size: 0.9rem;
   border-top: 1px solid #1a1a1a;
+}
+
+.footerContact {
+  margin-top: 15px;
+  font-weight: 500;
+  color: #d4af37;
+}
+
+.phoneLink {
+  color: #d4af37;
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.3s ease;
+}
+
+.phoneLink:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 .footer p {

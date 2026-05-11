@@ -90,7 +90,8 @@ const TEXT = {
     inquire: 'Inquire Now',
     cta: 'Ready for your Cyprus adventure?',
     ctaSub: 'Contact us today. We will make sure you are in the perfect car.',
-    ctaBtn: 'Get in Touch',
+    ctaBtn: 'Reserve Your Car Now',
+    ctaWhatsApp: 'Message on WhatsApp',
     mileage: 'Mileage',
     fuelTank: 'Fuel Tank',
     transmission: 'Transmission',
@@ -117,7 +118,8 @@ const TEXT = {
     inquire: 'Bilgi Al',
     cta: 'Kibris macerası için hazır?',
     ctaSub: 'Bugün bize ulaşın.',
-    ctaBtn: 'Iletişime Geç',
+    ctaBtn: 'Şimdi Araba Rezerve Edin',
+    ctaWhatsApp: 'WhatsApp\'ta Mesaj Gönder',
     mileage: 'Kilometre',
     fuelTank: 'Yakıt Tankı',
     transmission: 'Vites',
@@ -461,6 +463,9 @@ export default function Home() {
           <div className={styles.fleetHeader}>
             <h2>{t.fleet}</h2>
             <p>{t.fleetSubtitle}</p>
+            <p className={styles.pricingHighlight}>
+              {lang === 'en' ? 'Starting from €25/day' : '€25/günden başlayan'}
+            </p>
           </div>
 
           <div className={styles.carsGrid}>
@@ -589,12 +594,26 @@ export default function Home() {
         <section className={styles.cta}>
           <h2>{t.cta}</h2>
           <p>{t.ctaSub}</p>
-          <button className={styles.ctaButton} onClick={() => setModalOpen(true)}>{t.ctaBtn}</button>
+          <div className={styles.ctaButtons}>
+            <button className={styles.ctaButton} onClick={() => setModalOpen(true)}>
+              {t.ctaBtn}
+            </button>
+            <button className={styles.ctaButtonSecondary} onClick={() => {
+              const message = lang === 'en' ? 'Hi, I am interested in renting a car' : 'Merhaba, araba kiralamak istiyorum';
+              window.open(`https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`);
+            }}>
+              {t.ctaWhatsApp}
+            </button>
+          </div>
         </section>
 
         <footer className={styles.footer}>
           <p>{t.footer}</p>
           <p>{t.footerDetails}</p>
+          <p className={styles.footerContact}>
+            {lang === 'en' ? 'Call: ' : 'Ara: '}
+            <a href={`tel:${WHATSAPP_NUMBER}`} className={styles.phoneLink}>{WHATSAPP_NUMBER}</a>
+          </p>
         </footer>
       </div>
     </>
