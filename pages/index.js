@@ -22,21 +22,24 @@ const TESTIMONIALS = [
     name: 'Ahmed',
     location: 'Kyrenia',
     rating: 5,
-    quote: 'Rented the Yaris for a week. Drove up to Bellapais Abbey, down to the harbour. Handled rough roads perfectly. Staff was helpful when I needed to add an extra day. Would rent again.'
+    quote: 'Rented the Yaris for a week. Drove up to Bellapais Abbey, down to the harbour. Handled rough roads perfectly. Staff was helpful when I needed to add an extra day. Would rent again.',
+    quote_tr: 'Yaris kiraladi. Bellapais Manastiri ve limana gittim. Depo yolu mükemmel bir şekilde ele aldı. Ekstra bir gün eklemek istediğimde personel yardimci oldu. Tekrar kiralardim.'
   },
   {
     id: 2,
     name: 'Emma',
     location: 'Famagusta',
     rating: 5,
-    quote: 'Got the Honda CR-V. Went exploring with friends, hit some dirt roads toward the mountains. Car never had issues. Worth the price for peace of mind.'
+    quote: 'Got the Honda CR-V. Went exploring with friends, hit some dirt roads toward the mountains. Car never had issues. Worth the price for peace of mind.',
+    quote_tr: 'Honda CR-V aldim. Arkadaşlarımla keşfe çiktik, dağlara doğru toprak yollara çiktik. Araba asla sorun yaşamadı. Gönül rahatlığı için fiyata değdi.'
   },
   {
     id: 3,
     name: 'Tariq',
     location: 'Nicosia',
     rating: 5,
-    quote: 'Needed a car for 3 days. Booked online, picked it up same day. The Fiat 500 was fun, easy to park in the old city. Their WhatsApp support actually replied within minutes. Solid experience.'
+    quote: 'Needed a car for 3 days. Booked online, picked it up same day. The Fiat 500 was fun, easy to park in the old city. Their WhatsApp support actually replied within minutes. Solid experience.',
+    quote_tr: '3 gün için araba lazimdi. Çevrimçi olarak rezervasyon yaptim, aynı gün teslim aldim. Fiat 500 eğlenceli ve eski şehirde park etmesi kolay. WhatsApp desteği dakikalar içinde yanit verdi. Harika bir deneyim.'
   }
 ];
 
@@ -470,7 +473,7 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
-                <p className={styles.testimonialQuote}>{testimonial.quote}</p>
+                <p className={styles.testimonialQuote}>{lang === 'en' ? testimonial.quote : testimonial.quote_tr}</p>
               </div>
             ))}
           </div>
@@ -481,38 +484,34 @@ export default function Home() {
             <h2>{lang === 'en' ? 'Why Choose Cyprus Road' : 'Neden Cyprus Road'}</h2>
           </div>
 
-          {console.log('BEFORE BENEFITS.map - BENEFITS array:', BENEFITS, 'lang:', lang)}
-
           <div className={styles.benefitsGrid}>
-            {BENEFITS.map((benefit) => {
-              console.log('BENEFITS map rendering, benefit.id:', benefit.id, 'lang:', lang, 'headline_tr:', benefit.headline_tr);
+            {/* Benefit 1 */}
+            <div className={styles.benefitCard}>
+              <div className={styles.benefitIcon}>✓</div>
+              <h3 className={styles.benefitHeadline}>{lang === 'en' ? 'Dependable Fleet' : 'Güvenilir Filomuz'}</h3>
+              <p className={styles.benefitDescription}>{lang === 'en' ? 'Premium vehicles, regularly maintained. Drive without worry.' : 'Premium araçlar, düzenli bakım. Endişesiz sürün.'}</p>
+            </div>
 
-              // TEST: Use hard-coded Turkish for benefit 1 ONLY to see if lang changes propagate
-              let testHeadline = benefit.headline;
-              if (benefit.id === 1) {
-                testHeadline = lang === 'tr' ? 'TEST_TURKISH' : 'TEST_ENGLISH';
-              }
+            {/* Benefit 2 */}
+            <div className={styles.benefitCard}>
+              <div className={styles.benefitIcon}>📞</div>
+              <h3 className={styles.benefitHeadline}>{lang === 'en' ? 'Always Available' : 'Her Zaman Açık'}</h3>
+              <p className={styles.benefitDescription}>{lang === 'en' ? 'Support when you need it. Via WhatsApp, call, or email.' : 'WhatsApp, telefon veya e-posta ile destek. Gerektiğinde yanınızda.'}</p>
+            </div>
 
-              const benefitHeadline = lang === 'tr' ? benefit.headline_tr : benefit.headline;
-              const benefitDesc = lang === 'tr' ? benefit.description_tr : benefit.description;
+            {/* Benefit 3 */}
+            <div className={styles.benefitCard}>
+              <div className={styles.benefitIcon}>🚗</div>
+              <h3 className={styles.benefitHeadline}>{lang === 'en' ? 'Premium Comfort' : 'Premium Konfor'}</h3>
+              <p className={styles.benefitDescription}>{lang === 'en' ? 'Modern features, smooth rides, all terrain capable.' : 'Modern özellikler, düz sürüş, her arazi yolculuğu.'}</p>
+            </div>
 
-              return (
-              <div key={benefit.id} className={styles.benefitCard}>
-                <div className={styles.benefitIcon}>
-                  {benefit.icon === 'check-circle' && '✓'}
-                  {benefit.icon === 'phone' && '📞'}
-                  {benefit.icon === 'car' && '🚗'}
-                  {benefit.icon === 'dollar-sign' && '💰'}
-                </div>
-                <h3 className={styles.benefitHeadline}>
-                  {benefit.id === 1 ? testHeadline : benefitHeadline}
-                </h3>
-                <p className={styles.benefitDescription}>
-                  {benefitDesc}
-                </p>
-              </div>
-              );
-            })}
+            {/* Benefit 4 */}
+            <div className={styles.benefitCard}>
+              <div className={styles.benefitIcon}>💰</div>
+              <h3 className={styles.benefitHeadline}>{lang === 'en' ? 'Fair Pricing' : 'Uygun Fiyatlandırma'}</h3>
+              <p className={styles.benefitDescription}>{lang === 'en' ? 'Quality without premium markup. Adventure is affordable.' : 'Premium işçilik olmayan kalite. Macera uygun fiyatlı.'}</p>
+            </div>
           </div>
         </section>
 
