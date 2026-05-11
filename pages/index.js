@@ -483,7 +483,9 @@ export default function Home() {
 
           <div className={styles.benefitsGrid}>
             {BENEFITS.map((benefit) => {
-              console.log(`Benefit ${benefit.id}: lang=${lang}, headline_tr exists=${!!benefit.headline_tr}, rendering=${lang === 'en' ? benefit.headline : benefit.headline_tr}`);
+              const benefitHeadline = lang === 'tr' ? benefit.headline_tr : benefit.headline;
+              const benefitDesc = lang === 'tr' ? benefit.description_tr : benefit.description;
+
               return (
               <div key={benefit.id} className={styles.benefitCard}>
                 <div className={styles.benefitIcon}>
@@ -493,10 +495,10 @@ export default function Home() {
                   {benefit.icon === 'dollar-sign' && '💰'}
                 </div>
                 <h3 className={styles.benefitHeadline}>
-                  {lang === 'en' ? benefit.headline : benefit.headline_tr}
+                  {benefitHeadline}
                 </h3>
                 <p className={styles.benefitDescription}>
-                  {lang === 'en' ? benefit.description : benefit.description_tr}
+                  {benefitDesc}
                 </p>
               </div>
               );
