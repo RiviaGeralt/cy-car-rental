@@ -474,25 +474,46 @@ export default function Home() {
           </div>
 
           <div className={styles.benefitsGrid}>
-            {BENEFITS.map((benefit) => (
-              <div key={benefit.id} className={styles.benefitCard}>
-                <div className={styles.benefitIcon}>
-                  {benefit.icon === 'check-circle' && '✓'}
-                  {benefit.icon === 'phone' && '📞'}
-                  {benefit.icon === 'car' && '🚗'}
-                  {benefit.icon === 'dollar-sign' && '💰'}
+            {BENEFITS.map((benefit) => {
+              const benefitTranslations = {
+                en: {
+                  'Dependable Fleet': 'Premium vehicles, regularly maintained. Drive without worry.',
+                  'Always Available': 'Support when you need it. Via WhatsApp, call, or email.',
+                  'Premium Comfort': 'Modern features, smooth rides, all terrain capable.',
+                  'Fair Pricing': 'Quality without premium markup. Adventure is affordable.'
+                },
+                tr: {
+                  'Dependable Fleet': 'Güvenilir Filomuz - Premium araçlar, düzenli bakım. Endişesiz sürün.',
+                  'Always Available': 'Her Zaman Açık - WhatsApp, telefon veya e-posta ile destek.',
+                  'Premium Comfort': 'Premium Konfor - Modern özellikler, düz sürüş, her araziyi yolculuk kapasitesi.',
+                  'Fair Pricing': 'Uygun Fiyatlandırma - Kalite premium fiyat olmadan. Macera uygun fiyatlandırılmıştır.'
+                }
+              };
+
+              return (
+                <div key={benefit.id} className={styles.benefitCard}>
+                  <div className={styles.benefitIcon}>
+                    {benefit.icon === 'check-circle' && '✓'}
+                    {benefit.icon === 'phone' && '📞'}
+                    {benefit.icon === 'car' && '🚗'}
+                    {benefit.icon === 'dollar-sign' && '💰'}
+                  </div>
+                  <h3 className={styles.benefitHeadline}>
+                    {lang === 'en' ? benefit.headline : benefitTranslations.tr[benefit.headline]?.split(' - ')[0]}
+                  </h3>
+                  <p className={styles.benefitDescription}>
+                    {lang === 'en' ? benefit.description : benefitTranslations.tr[benefit.headline]?.split(' - ')[1] || benefit.description}
+                  </p>
                 </div>
-                <h3 className={styles.benefitHeadline}>{benefit.headline}</h3>
-                <p className={styles.benefitDescription}>{benefit.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
         <section className={styles.cta}>
           <h2>{t.cta}</h2>
           <p>{t.ctaSub}</p>
-          <button className={styles.ctaButton}>{t.ctaBtn}</button>
+          <button className={styles.ctaButton} onClick={() => setModalOpen(true)}>{t.ctaBtn}</button>
         </section>
 
         <footer className={styles.footer}>
