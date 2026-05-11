@@ -44,25 +44,33 @@ const BENEFITS = [
   {
     id: 1,
     headline: 'Dependable Fleet',
+    headline_tr: 'Güvenilir Filomuz',
     description: 'Premium vehicles, regularly maintained. Drive without worry.',
+    description_tr: 'Premium araçlar, düzenli bakım. Endişesiz sürün.',
     icon: 'check-circle'
   },
   {
     id: 2,
     headline: 'Always Available',
+    headline_tr: 'Her Zaman Açık',
     description: 'Support when you need it. Via WhatsApp, call, or email.',
+    description_tr: 'WhatsApp, telefon veya e-posta ile destek. Gerektiğinde yanınızda.',
     icon: 'phone'
   },
   {
     id: 3,
     headline: 'Premium Comfort',
+    headline_tr: 'Premium Konfor',
     description: 'Modern features, smooth rides, all terrain capable.',
+    description_tr: 'Modern özellikler, düz sürüş, her arazi yolculuğu.',
     icon: 'car'
   },
   {
     id: 4,
     headline: 'Fair Pricing',
+    headline_tr: 'Uygun Fiyatlandırma',
     description: 'Quality without premium markup. Adventure is affordable.',
+    description_tr: 'Premium işçilik olmayan kalite. Macera uygun fiyatlı.',
     icon: 'dollar-sign'
   }
 ];
@@ -474,39 +482,22 @@ export default function Home() {
           </div>
 
           <div className={styles.benefitsGrid}>
-            {BENEFITS.map((benefit) => {
-              const benefitTranslations = {
-                en: {
-                  'Dependable Fleet': 'Premium vehicles, regularly maintained. Drive without worry.',
-                  'Always Available': 'Support when you need it. Via WhatsApp, call, or email.',
-                  'Premium Comfort': 'Modern features, smooth rides, all terrain capable.',
-                  'Fair Pricing': 'Quality without premium markup. Adventure is affordable.'
-                },
-                tr: {
-                  'Dependable Fleet': 'Güvenilir Filomuz - Premium araçlar, düzenli bakım. Endişesiz sürün.',
-                  'Always Available': 'Her Zaman Açık - WhatsApp, telefon veya e-posta ile destek.',
-                  'Premium Comfort': 'Premium Konfor - Modern özellikler, düz sürüş, her araziyi yolculuk kapasitesi.',
-                  'Fair Pricing': 'Uygun Fiyatlandırma - Kalite premium fiyat olmadan. Macera uygun fiyatlandırılmıştır.'
-                }
-              };
-
-              return (
-                <div key={benefit.id} className={styles.benefitCard}>
-                  <div className={styles.benefitIcon}>
-                    {benefit.icon === 'check-circle' && '✓'}
-                    {benefit.icon === 'phone' && '📞'}
-                    {benefit.icon === 'car' && '🚗'}
-                    {benefit.icon === 'dollar-sign' && '💰'}
-                  </div>
-                  <h3 className={styles.benefitHeadline}>
-                    {lang === 'en' ? benefit.headline : benefitTranslations.tr[benefit.headline]?.split(' - ')[0]}
-                  </h3>
-                  <p className={styles.benefitDescription}>
-                    {lang === 'en' ? benefit.description : benefitTranslations.tr[benefit.headline]?.split(' - ')[1] || benefit.description}
-                  </p>
+            {BENEFITS.map((benefit) => (
+              <div key={benefit.id} className={styles.benefitCard}>
+                <div className={styles.benefitIcon}>
+                  {benefit.icon === 'check-circle' && '✓'}
+                  {benefit.icon === 'phone' && '📞'}
+                  {benefit.icon === 'car' && '🚗'}
+                  {benefit.icon === 'dollar-sign' && '💰'}
                 </div>
-              );
-            })}
+                <h3 className={styles.benefitHeadline}>
+                  {lang === 'en' ? benefit.headline : benefit.headline_tr}
+                </h3>
+                <p className={styles.benefitDescription}>
+                  {lang === 'en' ? benefit.description : benefit.description_tr}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
 
