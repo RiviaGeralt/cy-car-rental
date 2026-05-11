@@ -482,7 +482,9 @@ export default function Home() {
           </div>
 
           <div className={styles.benefitsGrid}>
-            {BENEFITS.map((benefit) => (
+            {BENEFITS.map((benefit) => {
+              console.log(`Benefit ${benefit.id}: lang=${lang}, headline_tr exists=${!!benefit.headline_tr}, rendering=${lang === 'en' ? benefit.headline : benefit.headline_tr}`);
+              return (
               <div key={benefit.id} className={styles.benefitCard}>
                 <div className={styles.benefitIcon}>
                   {benefit.icon === 'check-circle' && '✓'}
@@ -497,7 +499,8 @@ export default function Home() {
                   {lang === 'en' ? benefit.description : benefit.description_tr}
                 </p>
               </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
