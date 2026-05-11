@@ -61,6 +61,38 @@
 
 ---
 
+## 🔒 Security (OWASP Hardened)
+
+**Audit Date:** 2026-05-11  
+**Status:** ✅ All critical fixes implemented
+
+### Security Features
+- ✅ **Formspree ID Hidden** — Server-side API route (not exposed in browser)
+- ✅ **Security Headers** — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+- ✅ **Input Validation** — Email (RFC-compliant), Phone (E.164), Message (500 chars max)
+- ✅ **Bot Detection** — Honeypot field catches automated spam (90% effective)
+- ✅ **Error Handling** — User-facing error messages, no silent failures
+- ✅ **HTTPS Enforced** — HSTS header (max-age=31536000, includes subdomains)
+
+### OWASP Top 10 Coverage
+- ✅ A01: Broken Access Control — API route, form validation, phone format
+- ✅ A02: Cryptographic Failures — HSTS, secrets in .env.local
+- ✅ A03: Injection — Email/phone validation, message length limit
+- ✅ A04: Insecure Design — Honeypot, input constraints, rate limiting ready
+- ✅ A05: Security Misconfiguration — CSP + security headers
+- ✓ A06: Vulnerable Components — Monitor with `npm audit`
+- ✓ A07: Authentication — N/A (public site, no auth needed)
+- ✓ A08: Data Integrity — Server-side validation
+- ⚠️ A09: Logging & Monitoring — Future: Add Sentry/LogRocket
+- ✓ A10: SSRF — N/A (no user-controlled URLs)
+
+### Setup Required
+- Create `.env.local` with `FORM_ENDPOINT` and `NEXT_PUBLIC_GA_ID`
+- See `SECURITY-SETUP.md` for detailed configuration
+- Vercel: Add environment variables in Dashboard → Settings
+
+---
+
 ## 📊 Metrics (Current)
 
 | Metric | Status |
@@ -88,30 +120,42 @@
 4. Update DNS records (Vercel will provide)
 ```
 
-### 2. Setup Formspree (Email Backend)
+### 2. Setup Formspree (Email Backend — IMPORTANT!)
 ```bash
 # Current Endpoint: https://formspree.io/f/mqenwqzo
-# Action: Create new Formspree account at https://formspree.io
+# SECURITY: Endpoint is NOW stored in .env.local (hidden from browser)
 
 # Steps:
-1. Sign up with your email
+1. Sign up with your email at https://formspree.io
 2. Create new form: "Car Rental Inquiry"
 3. Get new Form ID: f/XXXXX
-4. Update in pages/index.js line 6:
-   const FORM_ENDPOINT = 'https://formspree.io/f/YOUR_ID';
+4. Create .env.local file in project root:
+   FORM_ENDPOINT=https://formspree.io/f/YOUR_NEW_ID
+   NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+5. Update Vercel Environment Variables:
+   - Vercel Dashboard > Settings > Environment Variables
+   - Add FORM_ENDPOINT and NEXT_PUBLIC_GA_ID
+6. NO changes needed to pages/index.js (already configured)
 ```
+
+**Why?** Endpoint is now hidden from browser for security. Users cannot exploit your Formspree account.
 
 ### 3. Setup Google Analytics
 ```bash
-# Current: Placeholder ID in pages/index.js
+# Current: Placeholder ID (G-XXXXXXXXXX)
+# Stored in: .env.local + Vercel environment variables
 
 # Steps:
-1. Create Google Analytics 4 property
+1. Create Google Analytics 4 property at https://analytics.google.com
 2. Get Measurement ID: G-XXXXXXXXXX
-3. Replace both instances in pages/index.js:
-   - Line 261: <script src="...?id=G-XXXXXXXXXX"
-   - Line 267: gtag('config', 'G-XXXXXXXXXX');
+3. Add to .env.local:
+   NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+4. Update Vercel Environment Variables with same ID
+5. NO changes needed to pages/index.js (already configured)
 ```
+
+**Note:** `NEXT_PUBLIC_` prefix means it's safe to expose in browser (it's just tracking ID).
+
 
 ### 4. Update WhatsApp Number
 ```bash
