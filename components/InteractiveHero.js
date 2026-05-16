@@ -24,8 +24,8 @@ const InteractiveHero = ({ language = 'en' }) => {
 
   const t = translations[language];
   // Use environment variable for video URL (Vercel Blob or self-hosted)
-  // Default: Cyprus coastal road video (free from Pexels, self-hosted)
-  const videoUrl = process.env.NEXT_PUBLIC_BLOB_VIDEO_URL || '/videos/hero-cyprus-driving.mp4';
+  // Default: AI-generated North Cyprus driving video (Veo3, self-hosted)
+  const videoUrl = process.env.NEXT_PUBLIC_BLOB_VIDEO_URL || '/videos/hero-north-cyprus-ai.mp4';
 
   return (
     <>
