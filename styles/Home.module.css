@@ -1197,6 +1197,41 @@
   .benefitsGrid {
     grid-template-columns: 1fr;
   }
+
+  /* Mobile modal fix per audit 2026-05-16: reduce padding for phones < 480px */
+  .modal {
+    padding: 20px;
+  }
+
+  .modalContent {
+    padding: 30px 20px;
+    max-width: 100%;
+    margin: 20px;
+  }
+
+  .form {
+    gap: 14px;
+  }
+
+  .form input,
+  .form textarea {
+    font-size: 16px; /* Prevent iOS zoom on input focus */
+    padding: 12px 14px;
+  }
+
+  .closeBtn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .submitBtn,
+  .whatsappBtn {
+    font-size: 16px; /* Touch target sizing */
+    padding: 16px;
+    width: 100%;
+  }
 }
 
 /* Vercel rebuild trigger */

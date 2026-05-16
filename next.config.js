@@ -31,21 +31,22 @@ const nextConfig = {
         ],
       },
       // External blob storage (Vercel Blob CDN headers)
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: '*.blob.vercel-storage.com',
-          },
-        ],
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
+      // DISABLED: Pattern has invalid regex syntax that crashes the server
+      // {
+      //   source: '/:path*',
+      //   has: [
+      //     {
+      //       type: 'host',
+      //       value: '*.blob.vercel-storage.com',
+      //     },
+      //   ],
+      //   headers: [
+      //     {
+      //       key: 'Cache-Control',
+      //       value: 'public, max-age=31536000, immutable',
+      //     },
+      //   ],
+      // },
       // Default security headers
       {
         source: '/:path*',

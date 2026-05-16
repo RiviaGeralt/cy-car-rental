@@ -29,6 +29,7 @@ const InteractiveHero = ({ language = 'en' }) => {
 
   return (
     <>
+      {/* Video preload fix: Changed from "metadata" to "auto" for faster hero load (performance audit 2026-05-16) */}
       <style jsx>{`
         .hero-container { position: relative; width: 100%; height: 100vh; overflow: hidden; background: #000; }
         .hero-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -55,7 +56,7 @@ const InteractiveHero = ({ language = 'en' }) => {
       `}</style>
 
       <div className="hero-container">
-        <video className="hero-video" autoPlay muted loop playsInline preload="metadata">
+        <video className="hero-video" autoPlay muted loop playsInline preload="auto">
           <source src={videoUrl} type="video/mp4" />
         </video>
         <div className="hero-overlay" />

@@ -19,8 +19,8 @@ export default async function handler(req, res) {
     const formspreeId = process.env.NEXT_PUBLIC_FORMSPREE_ID;
     
     if (!formspreeId) {
-      // Fallback: Just log the submission (for testing)
-      console.log('Form submission received:', { name, email, phone, message, car });
+      // Fallback: Just return success (production should always have NEXT_PUBLIC_FORMSPREE_ID set)
+      // Note: PII console.log removed per security audit 2026-05-16
       return res.status(200).json({
         success: true,
         message: 'Inquiry received. We will contact you via WhatsApp or email.'
