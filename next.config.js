@@ -16,6 +16,37 @@ const nextConfig = {
   // Security headers (OWASP hardening)
   async headers() {
     return [
+      // Video caching (optimize performance for hero section)
+      {
+        source: '/videos/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'Content-Type',
+            value: 'video/mp4',
+          },
+        ],
+      },
+      // External blob storage (Vercel Blob CDN headers)
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: '*.blob.vercel-storage.com',
+          },
+        ],
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Default security headers
       {
         source: '/:path*',
         headers: [

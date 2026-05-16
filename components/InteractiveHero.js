@@ -23,7 +23,8 @@ const InteractiveHero = ({ language = 'en' }) => {
   };
 
   const t = translations[language];
-  const videoUrl = 'https://videos.pexels.com/video-files/5731474/5731474-sd_640_360_30fps.mp4';
+  // Use environment variable for video URL (Vercel Blob or self-hosted)
+  const videoUrl = process.env.NEXT_PUBLIC_BLOB_VIDEO_URL || '/videos/hero-fallback.mp4';
 
   return (
     <>
