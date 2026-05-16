@@ -2,6 +2,7 @@ import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import Script from 'next/script';
 import styles from '../styles/Home.module.css';
+import InteractiveHero from '../components/InteractiveHero';
 
 // Form submission (server handles Formspree endpoint — hidden from browser)
 const FORM_ENDPOINT = '/api/submit-form';
@@ -357,6 +358,9 @@ export default function Home() {
             TR
           </button>
         </div>
+
+        {/* Interactive Hero Section with Mouse Tracking */}
+        <InteractiveHero language={lang} />
 
         {modalOpen && (
           <div className={styles.modal}>
