@@ -215,7 +215,7 @@ export default function Home() {
           email: formData.email,
           phone: formData.phone,
           message: formData.message,
-          car: selectedCar[lang === 'tr' ? 'name_tr' : 'name'],
+          car: selectedCar ? selectedCar[lang === 'tr' ? 'name_tr' : 'name'] : '(no car selected)',
         }),
       });
 
