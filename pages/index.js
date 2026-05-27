@@ -3,6 +3,10 @@ import { useState, useEffect } from 'react';
 import Script from 'next/script';
 import styles from '../styles/Home.module.css';
 import InteractiveHero from '../components/InteractiveHero';
+import Hero3D from '../components/Hero3D';
+import CarCard3D from '../components/CarCard3D';
+import AnimatedStats from '../components/AnimatedStats';
+import { motion } from 'framer-motion';
 
 // Form submission (server handles Formspree endpoint — hidden from browser)
 const FORM_ENDPOINT = '/api/submit-form';
@@ -359,8 +363,17 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Interactive Hero Section with Mouse Tracking */}
-        <InteractiveHero language={lang} />
+        {/* 3D Cinematic Hero — R3F + framer-motion */}
+        <Hero3D
+          language={lang}
+          onCTA={() => {
+            const fleet = document.querySelector('#fleet-section');
+            if (fleet) fleet.scrollIntoView({ behavior: 'smooth' });
+          }}
+        />
+
+        {/* Animated stats band */}
+        <AnimatedStats language={lang} />
 
         {modalOpen && (
           <div className={styles.modal}>
@@ -463,7 +476,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className={styles.fleet}>
+        <section id="fleet-section" className={styles.fleet}>
           <div className={styles.fleetHeader}>
             <h2>{t.fleet}</h2>
             <p>{t.fleetSubtitle}</p>
@@ -473,64 +486,15 @@ export default function Home() {
           </div>
 
           <div className={styles.carsGrid}>
-            {CARS.map((car, index) => {
-              const carName = lang === 'tr' ? car.name_tr : car.name;
-              const carDesc = lang === 'tr' ? car.description_tr : car.description;
-              const carFeatures = lang === 'tr' ? car.features_tr : car.features;
-
-              return (
-                <div key={car.id} className={styles.carCard} style={{ animationDelay: `${index * 0.1}s` }}>
-                  <div className={styles.carImage}>
-                    {imageLoading[car.id] && <div className={styles.skeleton}></div>}
-                    <img
-                      src={car.image}
-                      alt={`${carName} ${car.year} - Cyprus rental car`}
-                      className={styles.carImg}
-                      onLoad={() => setImageLoading(prev => ({ ...prev, [car.id]: false }))}
-                      onError={() => setImageLoading(prev => ({ ...prev, [car.id]: false }))}
-                      style={{ display: imageLoading[car.id] ? 'none' : 'block' }}
-                    />
-                  </div>
-                  <div className={styles.carIndex}>{String(car.id).padStart(2, '0')}</div>
-
-                  <div className={styles.carContent}>
-                    <div className={styles.carHeader}>
-                      <h3 className={styles.carName}>{carName}</h3>
-                      <p className={styles.carYear}>{car.year}</p>
-                    </div>
-
-                    <p className={styles.carDescription}>{carDesc}</p>
-
-                    <div className={styles.specs}>
-                      <div className={styles.specRow}>
-                        <span className={styles.specLabel}>{t.mileage}</span>
-                        <span className={styles.specValue}>{car.mileage}</span>
-                      </div>
-                      <div className={styles.specRow}>
-                        <span className={styles.specLabel}>{t.fuelTank}</span>
-                        <span className={styles.specValue}>{car.fuelTank}</span>
-                      </div>
-                      <div className={styles.specRow}>
-                        <span className={styles.specLabel}>{t.transmission}</span>
-                        <span className={styles.specValue}>{car.transmission}</span>
-                      </div>
-                    </div>
-
-                    <div className={styles.features}>
-                      {carFeatures.map((feature, idx) => (
-                        <span key={idx} className={styles.feature}>
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-
-                    <button className={styles.inquireBtn} onClick={() => handleInquire(car)}>
-                      {t.inquire}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            {CARS.map((car, index) => (
+              <CarCard3D
+                key={car.id}
+                car={car}
+                index={index}
+                language={lang}
+                onInquire={handleInquire}
+              />
+            ))}
           </div>
         </section>
 
