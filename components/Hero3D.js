@@ -1,51 +1,38 @@
-import React, { Suspense, useRef, useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+import React, { Suspense, useEffect, useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+import {
+  Environment, Float, ContactShadows, OrbitControls, Stars,
+} from '@react-three/drei';
 import { motion } from 'framer-motion';
 
 /**
  * Hero3D — cinematic 3D landing for Cyprus Road
- *
- * Stack: React Three Fiber + drei + framer-motion
- * Direction (impeccable shape): cinematic dark, North Cyprus golden hour,
- * rotating sculptural car, parallax dunes, glassmorphism CTA.
- *
- * SSR-safe: Canvas dynamic-imported with ssr:false.
+ * Imported via next/dynamic(ssr:false) from pages/index.js so SSR never
+ * touches three.js. Internal imports are normal (not dynamic) so the
+ * Canvas mounts with all pieces resolved — fixes WebGL context-lost race.
  */
 
-const Canvas = dynamic(() => import('@react-three/fiber').then(m => m.Canvas), { ssr: false });
-const Environment = dynamic(() => import('@react-three/drei').then(m => m.Environment), { ssr: false });
-const Float = dynamic(() => import('@react-three/drei').then(m => m.Float), { ssr: false });
-const ContactShadows = dynamic(() => import('@react-three/drei').then(m => m.ContactShadows), { ssr: false });
-const OrbitControls = dynamic(() => import('@react-three/drei').then(m => m.OrbitControls), { ssr: false });
-const Stars = dynamic(() => import('@react-three/drei').then(m => m.Stars), { ssr: false });
-
-// Sculptural car (procedural — no asset dependency, fast load)
 function SculptCar() {
   return (
     <group rotation={[0, Math.PI / 4, 0]} position={[0, -0.4, 0]}>
-      {/* body */}
       <mesh castShadow position={[0, 0.5, 0]}>
         <boxGeometry args={[2.6, 0.55, 1.1]} />
         <meshStandardMaterial color="#facc15" metalness={0.85} roughness={0.18} />
       </mesh>
-      {/* cabin */}
       <mesh castShadow position={[-0.05, 1.0, 0]}>
         <boxGeometry args={[1.5, 0.4, 0.95]} />
         <meshStandardMaterial color="#1f2937" metalness={0.95} roughness={0.05} />
       </mesh>
-      {/* hood */}
       <mesh castShadow position={[1.0, 0.75, 0]}>
         <boxGeometry args={[0.6, 0.1, 1.0]} />
         <meshStandardMaterial color="#f97316" metalness={0.9} roughness={0.15} />
       </mesh>
-      {/* wheels */}
       {[[-0.9, 0.25, 0.55], [0.9, 0.25, 0.55], [-0.9, 0.25, -0.55], [0.9, 0.25, -0.55]].map((p, i) => (
         <mesh key={i} castShadow position={p} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.27, 0.27, 0.22, 24]} />
           <meshStandardMaterial color="#0a0a0a" metalness={0.5} roughness={0.4} />
         </mesh>
       ))}
-      {/* headlights */}
       {[[1.31, 0.55, 0.35], [1.31, 0.55, -0.35]].map((p, i) => (
         <mesh key={i} position={p}>
           <sphereGeometry args={[0.09, 16, 16]} />
@@ -56,7 +43,6 @@ function SculptCar() {
   );
 }
 
-// Animated road ground plane
 function Road() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.4, 0]} receiveShadow>
@@ -67,8 +53,26 @@ function Road() {
 }
 
 const Hero3D = ({ language = 'en', onCTA }) => {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // Detect prefers-reduced-motion + low-power devices — bail to static if so
+  const [supports3D, setSupports3D] = useState(true);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    // crude mobile-low-memory check
+    const lowMem = navigator.deviceMemory && navigator.deviceMemory < 4;
+    if (reduced || lowMem) setSupports3D(false);
+
+    // catch WebGL context loss globally on the canvas
+    const handler = (e) => {
+      // eslint-disable-next-line no-console
+      console.warn('[Hero3D] WebGL context lost — disabling 3D');
+      setSupports3D(false);
+      e.preventDefault?.();
+    };
+    window.addEventListener('webglcontextlost', handler, true);
+    return () => window.removeEventListener('webglcontextlost', handler, true);
+  }, []);
 
   const t = language === 'tr' ? {
     title: 'Kıbrıs Yolu',
@@ -99,15 +103,17 @@ const Hero3D = ({ language = 'en', onCTA }) => {
             radial-gradient(ellipse at 50% 110%, #f97316 0%, #1a0a2e 35%, #050510 75%);
           isolation: isolate;
         }
-        .canvas-layer {
-          position: absolute; inset: 0;
-        }
+        .canvas-layer { position: absolute; inset: 0; }
         .grain {
-          position: absolute; inset: 0;
-          pointer-events: none;
-          opacity: 0.07;
-          mix-blend-mode: overlay;
+          position: absolute; inset: 0; pointer-events: none;
+          opacity: 0.07; mix-blend-mode: overlay;
           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+        }
+        .static-fallback {
+          position: absolute; inset: 0;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 12rem; opacity: 0.4; color: #facc15; pointer-events: none;
+          filter: drop-shadow(0 0 60px rgba(249,115,22,0.5));
         }
         .hero-content {
           position: absolute; inset: 0;
@@ -139,8 +145,7 @@ const Hero3D = ({ language = 'en', onCTA }) => {
         }
         .chips {
           display: flex; gap: 0.75rem; flex-wrap: wrap;
-          justify-content: center; margin-bottom: 2.5rem;
-          pointer-events: auto;
+          justify-content: center; margin-bottom: 2.5rem; pointer-events: auto;
         }
         .chip {
           display: inline-flex; align-items: center; gap: 0.45rem;
@@ -181,8 +186,7 @@ const Hero3D = ({ language = 'en', onCTA }) => {
           position: absolute; bottom: 1.8rem; left: 50%;
           transform: translateX(-50%);
           color: rgba(255,255,255,0.5); font-size: 0.75rem;
-          letter-spacing: 0.3em; text-transform: uppercase;
-          z-index: 6;
+          letter-spacing: 0.3em; text-transform: uppercase; z-index: 6;
         }
         .scroll-line {
           width: 1px; height: 40px; margin: 0.5rem auto 0;
@@ -204,25 +208,30 @@ const Hero3D = ({ language = 'en', onCTA }) => {
         }
       `}</style>
 
-      <div className="canvas-layer">
-        {mounted && (
+      {supports3D ? (
+        <div className="canvas-layer" data-lenis-prevent>
           <Canvas
             shadows
             camera={{ position: [4, 1.8, 4.5], fov: 38 }}
-            gl={{ antialias: true, alpha: true }}
-            dpr={[1, 1.8]}
+            gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: false }}
+            dpr={[1, 1.5]}
+            onCreated={({ gl }) => {
+              gl.domElement.addEventListener('webglcontextlost', (e) => {
+                e.preventDefault();
+                setSupports3D(false);
+              });
+            }}
           >
             <Suspense fallback={null}>
-              <color attach="background" args={[0]} />
+              <color attach="background" args={['#050510']} />
               <fog attach="fog" args={['#0a0a14', 8, 22]} />
-              <ambientLight intensity={0.35} />
+              <ambientLight intensity={0.4} />
               <directionalLight
-                position={[5, 6, 3]} intensity={1.6}
-                color="#fde68a" castShadow
-                shadow-mapSize={[1024, 1024]}
+                position={[5, 6, 3]} intensity={1.6} color="#fde68a"
+                castShadow shadow-mapSize={[1024, 1024]}
               />
               <directionalLight position={[-4, 3, -2]} intensity={0.6} color="#f97316" />
-              <Stars radius={50} depth={30} count={1200} factor={2.5} fade speed={0.5} />
+              <Stars radius={50} depth={30} count={1000} factor={2.5} fade speed={0.5} />
               <Float speed={1.6} rotationIntensity={0.35} floatIntensity={0.4}>
                 <SculptCar />
               </Float>
@@ -240,8 +249,11 @@ const Hero3D = ({ language = 'en', onCTA }) => {
               />
             </Suspense>
           </Canvas>
-        )}
-      </div>
+        </div>
+      ) : (
+        // Reduced-motion / low-mem / context-lost fallback: emoji silhouette + gradient bg
+        <div className="static-fallback" aria-hidden="true">🚗</div>
+      )}
 
       <div className="grain" />
 

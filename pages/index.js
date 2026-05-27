@@ -3,10 +3,25 @@ import { useState, useEffect } from 'react';
 import Script from 'next/script';
 import styles from '../styles/Home.module.css';
 import InteractiveHero from '../components/InteractiveHero';
-import Hero3D from '../components/Hero3D';
+import dynamic from 'next/dynamic';
 import CarCard3D from '../components/CarCard3D';
 import AnimatedStats from '../components/AnimatedStats';
 import { motion } from 'framer-motion';
+
+// Hero3D contains three.js — must be client-only. SSR + three crashes hydration.
+const Hero3D = dynamic(() => import('../components/Hero3D'), {
+  ssr: false,
+  loading: () => (
+    <div style={{
+      width: '100%', height: '100vh', minHeight: 640,
+      background: 'radial-gradient(ellipse at 50% 110%, #f97316 0%, #1a0a2e 35%, #050510 75%)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: '#fde68a', fontSize: '0.85rem', letterSpacing: '0.3em', textTransform: 'uppercase'
+    }}>
+      Loading…
+    </div>
+  )
+});
 
 // Form submission (server handles Formspree endpoint — hidden from browser)
 const FORM_ENDPOINT = '/api/submit-form';
