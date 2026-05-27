@@ -1232,6 +1232,120 @@
     padding: 16px;
     width: 100%;
   }
+
+  /* === Mobile extensions added 2026-05-27 (MOBILE-FIXES-REQUIRED.md FIX 3) === */
+
+  /* Typography */
+  .title { font-size: 1.75rem; }
+  .subtitle { font-size: 0.95rem; }
+  .heroText h2 { font-size: 1.5rem; }
+  .heroText p { font-size: 1rem; }
+  .fleetHeader h2 { font-size: 2rem; }
+
+  /* Hero section padding */
+  .hero {
+    padding: 50px 20px;
+    margin: 30px 20px;
+    border-radius: 16px;
+  }
+
+  /* Fleet section */
+  .fleet { padding: 40px 20px; }
+  .fleetHeader { margin-bottom: 40px; }
+  .pricingHighlight { margin-top: 15px; font-size: 1.2rem; }
+
+  /* Car grid - single column */
+  .carsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .carCard { border-radius: 12px; }
+  .carImage { height: 240px; }
+  .carContent { padding: 24px; }
+  .carIndex { font-size: 2.5rem; top: 10px; right: 15px; }
+  .carName { font-size: 1.4rem; }
+  .carDescription { font-size: 0.95rem; margin-bottom: 20px; }
+  .specs { margin-bottom: 20px; padding-bottom: 20px; }
+  .specRow { padding: 10px 0; font-size: 0.9rem; }
+  .features { gap: 8px; }
+  .feature { font-size: 0.85rem; padding: 6px 10px; }
+  .inquireBtn { padding: 12px 16px; font-size: 0.95rem; }
+
+  /* Benefits */
+  .benefitCard { padding: 24px 16px; }
+  .benefitIcon { font-size: 2.5rem; margin-bottom: 12px; }
+  .benefitHeadline { font-size: 1.2rem; }
+  .benefitDescription { font-size: 0.95rem; }
+
+  /* CTA - stack buttons vertically */
+  .cta { padding: 40px 20px; }
+  .cta h2 { font-size: 1.8rem; }
+  .cta p { font-size: 0.95rem; }
+  .ctaButtons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ctaButton,
+  .ctaButtonSecondary {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    width: 100%;
+  }
+
+  /* Language switcher - bottom right horizontal */
+  .sideLangSwitcher {
+    position: fixed;
+    right: 10px;
+    top: auto;
+    bottom: 20px;
+    transform: none;
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px 6px;
+    border-radius: 8px;
+  }
+  .sideLangBtn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    min-width: auto;
+  }
+
+  /* Language modal */
+  .langModalPopup { padding: 40px 24px; max-width: 90vw; }
+  .langModalPopup h2 { font-size: 1.6rem; }
+  .langModalBtn {
+    padding: 12px 30px;
+    font-size: 0.95rem;
+    min-width: 120px;
+  }
+
+  /* Footer + Header padding */
+  .footer { padding: 40px 20px; }
+  .footer p { font-size: 0.95rem; }
+  .header { padding: 40px 20px; }
+
+  /* Error/Success messages */
+  .errorAlert,
+  .successMessage {
+    font-size: 0.95rem;
+    padding: 12px 14px;
+  }
+  .errorText { font-size: 0.85rem; }
+  .charCounter { font-size: 0.85rem; }
+
+  /* Modal headline + tighter padding */
+  .modalContent h3 { font-size: 1.4rem; margin-bottom: 8px; }
+  .modalContent p { font-size: 0.95rem; }
+}
+
+/* Extra small phones (below 375px) - added 2026-05-27 */
+@media (max-width: 375px) {
+  .title { font-size: 1.5rem; }
+  .subtitle { font-size: 0.9rem; }
+  .sideLangSwitcher { right: 8px; bottom: 15px; }
+  .hero { padding: 40px 15px; margin: 25px 15px; }
+  .cta { padding: 30px 15px; }
+  .cta h2 { font-size: 1.5rem; }
 }
 
 /* Vercel rebuild trigger */

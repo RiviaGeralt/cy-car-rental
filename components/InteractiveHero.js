@@ -4,9 +4,13 @@
  * Interactive Car Rental Hero Section with Video Background
  *
  * Customized for: Cyprus Road Car Rental
+ * Mobile fixes 2026-05-27: poster fallback + onError handler (MOBILE-FIXES-REQUIRED.md FIX 1, 2)
  */
 
+const HERO_POSTER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'%3E%3Crect fill='%231a1a2e' width='1920' height='1080'/%3E%3C/svg%3E";
+
 const InteractiveHero = ({ language = 'en' }) => {
+  const [videoError, setVideoError] = useState(false);
   const translations = {
     en: {
       title: 'Start Your Cyprus Story',
@@ -56,7 +60,17 @@ const InteractiveHero = ({ language = 'en' }) => {
       `}</style>
 
       <div className="hero-container">
-        <video className="hero-video" autoPlay muted loop playsInline preload="auto">
+        <video
+          className="hero-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster={HERO_POSTER}
+          onError={() => setVideoError(true)}
+          style={{ background: videoError ? '#1a1a2e' : 'transparent' }}
+        >
           <source src={videoUrl} type="video/mp4" />
         </video>
         <div className="hero-overlay" />
