@@ -1,8 +1,10 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import {
-  Environment, Float, ContactShadows, OrbitControls, Stars,
+  Float, ContactShadows, OrbitControls, Stars,
 } from '@react-three/drei';
+// NOTE: drei's <Environment preset="..."> fetches HDRIs from raw.githack.com
+// which our CSP blocks. We replace it with hand-tuned lights below.
 import { motion } from 'framer-motion';
 
 /**
@@ -225,12 +227,20 @@ const Hero3D = ({ language = 'en', onCTA }) => {
             <Suspense fallback={null}>
               <color attach="background" args={['#050510']} />
               <fog attach="fog" args={['#0a0a14', 8, 22]} />
-              <ambientLight intensity={0.4} />
+              {/* Hand-crafted golden-hour rig (no HDRI fetch) */}
+              <ambientLight intensity={0.55} color="#fef3c7" />
+              <hemisphereLight args={['#fde68a', '#1a0a2e', 0.6]} />
+              {/* Key — warm sun */}
               <directionalLight
-                position={[5, 6, 3]} intensity={1.6} color="#fde68a"
+                position={[5, 6, 3]} intensity={2.2} color="#fde68a"
                 castShadow shadow-mapSize={[1024, 1024]}
               />
-              <directionalLight position={[-4, 3, -2]} intensity={0.6} color="#f97316" />
+              {/* Fill — amber kick */}
+              <directionalLight position={[-4, 3, -2]} intensity={1.0} color="#f97316" />
+              {/* Rim — cool back-light to pop the silhouette */}
+              <pointLight position={[-3, 4, -5]} intensity={1.4} color="#a78bfa" distance={20} />
+              {/* Ground glow */}
+              <pointLight position={[0, 0.5, 0]} intensity={0.6} color="#facc15" distance={6} />
               <Stars radius={50} depth={30} count={1000} factor={2.5} fade speed={0.5} />
               <Float speed={1.6} rotationIntensity={0.35} floatIntensity={0.4}>
                 <SculptCar />
@@ -240,7 +250,6 @@ const Hero3D = ({ language = 'en', onCTA }) => {
                 position={[0, -0.39, 0]} opacity={0.55}
                 scale={10} blur={2.4} far={4}
               />
-              <Environment preset="sunset" />
               <OrbitControls
                 enableZoom={false} enablePan={false}
                 autoRotate autoRotateSpeed={0.6}

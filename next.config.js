@@ -53,7 +53,20 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.googletagmanager.com/gtag/js https://www.google-analytics.com; img-src 'self' https: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none';",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+              "img-src 'self' https: data: blob:",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com data:",
+              // Allow analytics + drei HDRI/asset hosts + WhatsApp + pexels
+              "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://*.google-analytics.com https://raw.githack.com https://*.githack.com https://images.pexels.com https://*.pexels.com https://wa.me",
+              "worker-src 'self' blob:",
+              "media-src 'self' https: blob: data:",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; ') + ';',
           },
           {
             key: 'X-Frame-Options',
