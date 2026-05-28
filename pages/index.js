@@ -8,13 +8,14 @@ import CarCard3D from '../components/CarCard3D';
 import AnimatedStats from '../components/AnimatedStats';
 import { motion } from 'framer-motion';
 
-// Hero3D contains three.js — must be client-only. SSR + three crashes hydration.
-const Hero3D = dynamic(() => import('../components/Hero3D'), {
+// HeroPro: photo-real luxury car + animated SVG beams (no WebGL).
+// Replaces the procedural R3F box-car (read as a kid's toy).
+const Hero3D = dynamic(() => import('../components/HeroPro'), {
   ssr: false,
   loading: () => (
     <div style={{
       width: '100%', height: '100vh', minHeight: 640,
-      background: 'radial-gradient(ellipse at 50% 110%, #f97316 0%, #1a0a2e 35%, #050510 75%)',
+      background: '#050510',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       color: '#fde68a', fontSize: '0.85rem', letterSpacing: '0.3em', textTransform: 'uppercase'
     }}>
