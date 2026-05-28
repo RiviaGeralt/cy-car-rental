@@ -8,14 +8,14 @@ import CarCard3D from '../components/CarCard3D';
 import AnimatedStats from '../components/AnimatedStats';
 import { motion } from 'framer-motion';
 
-// HeroPro: photo-real luxury car + animated SVG beams (no WebGL).
-// Replaces the procedural R3F box-car (read as a kid's toy).
-const Hero3D = dynamic(() => import('../components/HeroPro'), {
+// HeroCinematic: realistic procedural R3F sedan + drei Lightformer environment
+// + MeshReflectorMaterial floor + scroll-driven cinematic camera orbit.
+const Hero3D = dynamic(() => import('../components/HeroCinematic'), {
   ssr: false,
   loading: () => (
     <div style={{
       width: '100%', height: '100vh', minHeight: 640,
-      background: '#050510',
+      background: 'transparent',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       color: '#fde68a', fontSize: '0.85rem', letterSpacing: '0.3em', textTransform: 'uppercase'
     }}>
@@ -23,6 +23,10 @@ const Hero3D = dynamic(() => import('../components/HeroPro'), {
     </div>
   )
 });
+
+// Page-wide scroll-reactive parallax backdrop (orbs + aurora + grain).
+// Mounted once at page root, visible behind every section.
+const ScrollBackdrop = dynamic(() => import('../components/ScrollBackdrop'), { ssr: false });
 
 // Form submission (server handles Formspree endpoint — hidden from browser)
 const FORM_ENDPOINT = '/api/submit-form';
@@ -338,6 +342,9 @@ export default function Home() {
       </Script>
 
       <div className={styles.container}>
+        {/* Site-wide animated background — orbs + aurora parallax on every scroll */}
+        <ScrollBackdrop />
+
         {/* Language Modal - appears on first load */}
         {langModalOpen && (
           <div className={styles.langModalOverlay}>
