@@ -3,28 +3,32 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
   Float, ContactShadows, Stars, Sparkles,
 } from '@react-three/drei';
-import { motion } from 'framer-motion';
+import {
+  motion, useScroll, useTransform, useSpring,
+  useMotionValue, AnimatePresence,
+} from 'framer-motion';
 import * as THREE from 'three';
+import AuroraBackground from './AuroraBackground';
 
 /**
- * Hero3D v2 — cinematic 3D landing for Cyprus Road
+ * Hero3D v3 — cinematic 3D landing for Cyprus Road
  *
- * MOBILE SCROLL FIX (critical):
- *   - .canvas-layer has `pointer-events: none` → touches pass through to <body>,
- *     so vertical swipes scroll the page instead of being eaten by the canvas.
- *   - OrbitControls REMOVED — they capture touch/pointer events even when
- *     vertical-only swipes are intended. We auto-rotate the scene via useFrame
- *     instead, which is purely visual and never grabs input.
- *   - `data-lenis-prevent` REMOVED from the canvas wrapper — Lenis must own
- *     scroll on mobile or the page locks.
+ * v3 additions:
+ *   - 21st.dev-style AuroraBackground layered behind the R3F canvas
+ *     (transparent canvas alpha lets it bleed through the scene)
+ *   - Deeper Framer Motion:
+ *       • useScroll + useTransform → real scroll-linked parallax on text
+ *       • stagger container variants → cinematic cascade entrance
+ *       • Magnetic CTA button (pointer-tracking spring)
+ *       • Character-by-character title reveal
+ *       • AnimatePresence on language swap (smooth crossfade)
+ *       • whileHover/whileTap micro-interactions on chips & secondary CTA
  *
- * VISUAL UPGRADES:
- *   - Scroll-driven camera dolly + tilt (window.scrollY → useFrame)
- *   - Mouse parallax on DESKTOP only (pointer:fine media query)
- *   - Particle dust field (drifts upward)
- *   - 3 volumetric light cones (additive blended, slowly rotating)
- *   - Detailed car: emissive interior, neon underglow, side stripe, grille bars
- *   - Reflective floor disc with radial glow ring
+ * Carried over from v2:
+ *   - .canvas-layer pointer-events:none (mobile scroll fix)
+ *   - No OrbitControls (auto-rotate via useFrame)
+ *   - Scroll dolly + desktop-only mouse parallax inside the 3D scene
+ *   - Hand-crafted golden-hour rig (no HDRI fetch — CSP-safe)
  */
 
 /* ─────────────────── Car (improved geometry + emissive accents) ─────────────────── */
@@ -76,7 +80,7 @@ function SculptCar() {
           <meshStandardMaterial color="#0a0a0a" metalness={0.5} roughness={0.4} />
         </mesh>
       ))}
-      {/* Wheel hubs (subtle) */}
+      {/* Wheel hubs */}
       {[[-0.9, 0.25, 0.66], [0.9, 0.25, 0.66], [-0.9, 0.25, -0.66], [0.9, 0.25, -0.66]].map((p, i) => (
         <mesh key={`hub-${i}`} position={p} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.09, 0.09, 0.02, 16]} />
@@ -97,7 +101,7 @@ function SculptCar() {
           <meshStandardMaterial emissive="#ef4444" emissiveIntensity={2} color="#7f1d1d" toneMapped={false} />
         </mesh>
       ))}
-      {/* Neon underglow (additive plane) */}
+      {/* Neon underglow */}
       <mesh position={[0, 0.12, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[3.0, 1.5]} />
         <meshBasicMaterial
@@ -118,12 +122,10 @@ function SculptCar() {
 function Floor() {
   return (
     <group position={[0, -0.4, 0]}>
-      {/* Dark base */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[40, 40]} />
         <meshStandardMaterial color="#06060c" metalness={0.6} roughness={0.55} />
       </mesh>
-      {/* Radial glow ring (additive) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, 0]}>
         <ringGeometry args={[1.6, 4.5, 64]} />
         <meshBasicMaterial
@@ -152,7 +154,7 @@ function Floor() {
   );
 }
 
-/* ─────────────────── Volumetric light beams (additive cones) ─────────────────── */
+/* ─────────────────── Volumetric light beams ─────────────────── */
 
 function LightBeam({ color, angleOffset = 0, radius = 4, height = 8 }) {
   const ref = useRef();
@@ -227,7 +229,7 @@ function Dust({ count = 220 }) {
   );
 }
 
-/* ─────────────────── Scene rig: auto-rotate + scroll dolly + mouse parallax ─────────────────── */
+/* ─────────────────── Scene rig ─────────────────── */
 
 function SceneRig({ children }) {
   const groupRef = useRef();
@@ -241,7 +243,7 @@ function SceneRig({ children }) {
     desktopRef.current = window.matchMedia('(pointer: fine)').matches;
 
     const onScroll = () => {
-      scrollRef.current = Math.min(window.scrollY / 600, 1.2); // 0..1.2
+      scrollRef.current = Math.min(window.scrollY / 600, 1.2);
     };
     const onPointer = (e) => {
       if (!desktopRef.current) return;
@@ -260,15 +262,12 @@ function SceneRig({ children }) {
     };
   }, []);
 
-  // Camera base
   const base = useRef({ x: 4, y: 1.8, z: 4.5 });
 
   useFrame((_, delta) => {
-    // Auto-rotate the whole scene (replaces OrbitControls autoRotate)
     if (groupRef.current) {
       groupRef.current.rotation.y += delta * 0.18;
     }
-    // Scroll dolly: camera pulls back & tilts down as user scrolls
     const s = scrollRef.current;
     const targetX = base.current.x + s * 1.2 + pointerRef.current.x * 0.35;
     const targetY = base.current.y + s * 1.5 + pointerRef.current.y * -0.25;
@@ -283,10 +282,110 @@ function SceneRig({ children }) {
   return <group ref={groupRef}>{children}</group>;
 }
 
+/* ─────────────────── Framer Motion helpers ─────────────────── */
+
+// Stagger container — orchestrates cinematic cascade entrance
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.14, delayChildren: 0.2 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 32, filter: 'blur(8px)' },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.9, ease: [0.2, 0.8, 0.2, 1] },
+  },
+};
+
+// Character-by-character title reveal
+function AnimatedTitle({ text }) {
+  const chars = useMemo(() => Array.from(text), [text]);
+  return (
+    <motion.h1
+      className="hero-title"
+      aria-label={text}
+      initial="hidden"
+      animate="show"
+      variants={{
+        hidden: {},
+        show: { transition: { staggerChildren: 0.045, delayChildren: 0.35 } },
+      }}
+    >
+      {chars.map((c, i) => (
+        <motion.span
+          key={`${c}-${i}`}
+          aria-hidden="true"
+          style={{ display: 'inline-block', whiteSpace: 'pre' }}
+          variants={{
+            hidden: { opacity: 0, y: 60, rotateX: -90 },
+            show: {
+              opacity: 1,
+              y: 0,
+              rotateX: 0,
+              transition: { duration: 0.7, ease: [0.2, 0.8, 0.2, 1] },
+            },
+          }}
+        >
+          {c === ' ' ? ' ' : c}
+        </motion.span>
+      ))}
+    </motion.h1>
+  );
+}
+
+// Magnetic CTA — button leans toward the pointer
+function MagneticCTA({ children, onClick, className }) {
+  const ref = useRef(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const sx = useSpring(x, { stiffness: 260, damping: 18, mass: 0.4 });
+  const sy = useSpring(y, { stiffness: 260, damping: 18, mass: 0.4 });
+
+  const onMove = (e) => {
+    const el = ref.current;
+    if (!el) return;
+    if (!window.matchMedia?.('(pointer: fine)').matches) return;
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    x.set((e.clientX - cx) * 0.25);
+    y.set((e.clientY - cy) * 0.35);
+  };
+  const onLeave = () => { x.set(0); y.set(0); };
+
+  return (
+    <motion.button
+      ref={ref}
+      className={className}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      onClick={onClick}
+      style={{ x: sx, y: sy }}
+      whileTap={{ scale: 0.96 }}
+    >
+      {children}
+    </motion.button>
+  );
+}
+
 /* ─────────────────── Main component ─────────────────── */
 
 const Hero3D = ({ language = 'en', onCTA }) => {
   const [supports3D, setSupports3D] = useState(true);
+  const sectionRef = useRef(null);
+
+  // Scroll-linked parallax (Framer Motion) — text translates up & fades as user scrolls
+  const { scrollY } = useScroll();
+  const yContent = useTransform(scrollY, [0, 600], [0, -120]);
+  const opacityContent = useTransform(scrollY, [0, 500], [1, 0]);
+  const yScrollCue = useTransform(scrollY, [0, 200], [0, 40]);
+  const opacityScrollCue = useTransform(scrollY, [0, 200], [1, 0]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -320,7 +419,7 @@ const Hero3D = ({ language = 'en', onCTA }) => {
   };
 
   return (
-    <section className="hero3d-wrap">
+    <section ref={sectionRef} className="hero3d-wrap">
       <style jsx>{`
         .hero3d-wrap {
           position: relative;
@@ -328,30 +427,27 @@ const Hero3D = ({ language = 'en', onCTA }) => {
           height: 100vh;
           min-height: 640px;
           overflow: hidden;
+          /* Darker base so the AuroraBackground reads */
           background:
-            radial-gradient(ellipse at 50% 110%, #f97316 0%, #1a0a2e 35%, #050510 75%);
+            radial-gradient(ellipse at 50% 110%, #1a0a2e 0%, #0a0816 45%, #050510 80%);
           isolation: isolate;
-          /* Allow page to vertical-scroll over the hero on touch devices */
           touch-action: pan-y;
         }
-        /* CRITICAL: pointer-events:none → all touches/clicks pass through
-           to the page (which means Lenis/native scroll receives them).
-           Only the .hero-content children that opt-in via pointer-events:auto
-           are interactive. */
         .canvas-layer {
           position: absolute; inset: 0;
           pointer-events: none;
           touch-action: pan-y;
+          z-index: 1;
         }
         .grain {
           position: absolute; inset: 0; pointer-events: none;
           opacity: 0.07; mix-blend-mode: overlay;
           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+          z-index: 3;
         }
-        /* Subtle vignette to push focus toward center */
         .vignette {
           position: absolute; inset: 0; pointer-events: none;
-          background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(5,5,16,0.55) 100%);
+          background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(5,5,16,0.65) 100%);
           z-index: 2;
         }
         .static-fallback {
@@ -359,6 +455,7 @@ const Hero3D = ({ language = 'en', onCTA }) => {
           display: flex; align-items: center; justify-content: center;
           font-size: 12rem; opacity: 0.4; color: #facc15; pointer-events: none;
           filter: drop-shadow(0 0 60px rgba(249,115,22,0.5));
+          z-index: 1;
         }
         .hero-content {
           position: absolute; inset: 0;
@@ -366,7 +463,6 @@ const Hero3D = ({ language = 'en', onCTA }) => {
           align-items: center; justify-content: center;
           padding: 2rem; text-align: center;
           z-index: 5;
-          /* Container itself doesn't block scroll; only chips/CTAs opt in */
           pointer-events: none;
         }
         .eyebrow {
@@ -375,6 +471,7 @@ const Hero3D = ({ language = 'en', onCTA }) => {
           color: #fde68a; margin-bottom: 1.2rem; font-weight: 500;
           text-shadow: 0 2px 12px rgba(0,0,0,0.6);
         }
+        .hero-title :global(.hero-title),
         .hero-title {
           font-size: clamp(2.5rem, 9vw, 6.5rem);
           font-weight: 800; line-height: 0.95;
@@ -383,6 +480,7 @@ const Hero3D = ({ language = 'en', onCTA }) => {
           -webkit-text-fill-color: transparent;
           margin: 0 0 1.2rem; letter-spacing: -0.03em;
           filter: drop-shadow(0 8px 30px rgba(249, 115, 22, 0.4));
+          perspective: 800px;
         }
         .hero-sub {
           font-size: clamp(1rem, 2.2vw, 1.35rem);
@@ -403,6 +501,7 @@ const Hero3D = ({ language = 'en', onCTA }) => {
           backdrop-filter: blur(14px) saturate(140%);
           -webkit-backdrop-filter: blur(14px) saturate(140%);
           color: #fff; font-size: 0.875rem; font-weight: 500;
+          cursor: default;
         }
         .chip span:first-child { color: #facc15; }
         .cta-row {
@@ -416,12 +515,21 @@ const Hero3D = ({ language = 'en', onCTA }) => {
           border-radius: 999px; letter-spacing: 0.02em;
           box-shadow: 0 12px 40px rgba(249, 115, 22, 0.45),
                       0 0 0 1px rgba(255,255,255,0.1) inset;
-          transition: transform 0.25s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s;
+          transition: box-shadow 0.25s;
+          position: relative;
+          overflow: hidden;
+        }
+        .cta-primary::after {
+          content: '';
+          position: absolute; inset: 0;
+          background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+          transform: translateX(-100%);
+          transition: transform 0.8s;
         }
         .cta-primary:hover {
-          transform: translateY(-2px) scale(1.02);
           box-shadow: 0 18px 50px rgba(249, 115, 22, 0.65);
         }
+        .cta-primary:hover::after { transform: translateX(100%); }
         .cta-secondary {
           padding: 1.05rem 2rem; cursor: pointer;
           background: rgba(255,255,255,0.04);
@@ -430,9 +538,7 @@ const Hero3D = ({ language = 'en', onCTA }) => {
           color: #fff; font-weight: 500; font-size: 1rem;
           border-radius: 999px; text-decoration: none;
           display: inline-flex; align-items: center; gap: 0.5rem;
-          transition: background 0.25s;
         }
-        .cta-secondary:hover { background: rgba(255,255,255,0.10); }
         .scroll-cue {
           position: absolute; bottom: 1.8rem; left: 50%;
           transform: translateX(-50%);
@@ -461,6 +567,9 @@ const Hero3D = ({ language = 'en', onCTA }) => {
         }
       `}</style>
 
+      {/* 21st.dev-style animated aurora — sits BEHIND the 3D canvas */}
+      <AuroraBackground />
+
       {supports3D ? (
         <div className="canvas-layer">
           <Canvas
@@ -473,16 +582,14 @@ const Hero3D = ({ language = 'en', onCTA }) => {
                 e.preventDefault();
                 setSupports3D(false);
               });
-              // Belt-and-suspenders: ensure the canvas itself never grabs touches
               gl.domElement.style.touchAction = 'pan-y';
               gl.domElement.style.pointerEvents = 'none';
             }}
           >
             <Suspense fallback={null}>
-              <color attach="background" args={['#050510']} />
+              {/* Transparent clear so AuroraBackground bleeds through */}
               <fog attach="fog" args={['#0a0a14', 8, 24]} />
 
-              {/* Hand-crafted golden-hour rig (no HDRI fetch) */}
               <ambientLight intensity={0.55} color="#fef3c7" />
               <hemisphereLight args={['#fde68a', '#1a0a2e', 0.6]} />
               <directionalLight
@@ -521,67 +628,74 @@ const Hero3D = ({ language = 'en', onCTA }) => {
       <div className="grain" />
       <div className="vignette" />
 
+      {/* Hero content — scroll-linked parallax + stagger cascade + AnimatePresence on language */}
       <motion.div
         className="hero-content"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.1, ease: [0.2, 0.8, 0.2, 1] }}
+        style={{ y: yContent, opacity: opacityContent }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
       >
-        <motion.div
-          className="eyebrow"
-          initial={{ opacity: 0, letterSpacing: '0.2em' }}
-          animate={{ opacity: 1, letterSpacing: '0.4em' }}
-          transition={{ duration: 1.4, delay: 0.2 }}
-        >
-          North Cyprus · Est. 2024
-        </motion.div>
-
-        <motion.h1
-          className="hero-title"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.0, delay: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
-        >
-          {t.title}
-        </motion.h1>
-
-        <motion.p
-          className="hero-sub"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          transition={{ duration: 0.9, delay: 0.55 }}
-        >
-          {t.sub}
-        </motion.p>
-
-        <motion.div
-          className="chips"
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.75 }}
-        >
-          {[t.chip1, t.chip2, t.chip3].map((c, i) => (
-            <span key={i} className="chip"><span>✦</span><span>{c}</span></span>
-          ))}
-        </motion.div>
-
-        <motion.div
-          className="cta-row"
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.95 }}
-        >
-          <button className="cta-primary" onClick={onCTA}>{t.cta} →</button>
-          <a
-            className="cta-secondary"
-            href="https://wa.me/970594198211"
-            target="_blank" rel="noopener noreferrer"
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`lang-${language}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
           >
-            <span>💬</span><span>WhatsApp</span>
-          </a>
-        </motion.div>
+            <motion.div className="eyebrow" variants={itemVariants}>
+              {language === 'tr' ? 'Kuzey Kıbrıs · Kuruluş 2024' : 'North Cyprus · Est. 2024'}
+            </motion.div>
+
+            <AnimatedTitle text={t.title} />
+
+            <motion.p className="hero-sub" variants={itemVariants}>
+              {t.sub}
+            </motion.p>
+
+            <motion.div className="chips" variants={itemVariants}>
+              {[t.chip1, t.chip2, t.chip3].map((c, i) => (
+                <motion.span
+                  key={i}
+                  className="chip"
+                  whileHover={{
+                    y: -3,
+                    backgroundColor: 'rgba(250, 204, 21, 0.12)',
+                    borderColor: 'rgba(250, 204, 21, 0.35)',
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <span>✦</span><span>{c}</span>
+                </motion.span>
+              ))}
+            </motion.div>
+
+            <motion.div className="cta-row" variants={itemVariants}>
+              <MagneticCTA className="cta-primary" onClick={onCTA}>
+                {t.cta} →
+              </MagneticCTA>
+              <motion.a
+                className="cta-secondary"
+                href="https://wa.me/970594198211"
+                target="_blank" rel="noopener noreferrer"
+                whileHover={{ backgroundColor: 'rgba(255,255,255,0.10)', y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.2 }}
+              >
+                <span>💬</span><span>WhatsApp</span>
+              </motion.a>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
       </motion.div>
 
       <motion.div
         className="scroll-cue"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+        style={{ y: yScrollCue, opacity: opacityScrollCue }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 1.0, delay: 1.6 }}
       >
         Scroll
