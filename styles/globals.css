@@ -6,20 +6,19 @@
   box-sizing: border-box;
 }
 
-html {
-  background: #050510;
-}
-
 html, body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  /* body must be transparent so ScrollBackdrop (z:-1, fixed) is visible — html provides the base color */
-  background: transparent;
   color: #f5f5f5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.55;
   overflow-x: hidden;
 }
+
+/* Order matters: html gets the deep base color, body MUST stay transparent
+   so the ScrollBackdrop (position:fixed; z-index:-1) renders above body's bg. */
+html { background: #050510; }
+body { background: transparent; }
 
 /* Lenis smooth scroll setup */
 html.lenis, html.lenis body { height: auto; }
