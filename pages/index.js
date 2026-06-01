@@ -6,6 +6,7 @@ import InteractiveHero from '../components/InteractiveHero';
 import dynamic from 'next/dynamic';
 import CarCard3D from '../components/CarCard3D';
 import AnimatedStats from '../components/AnimatedStats';
+import WhatsAppFloat from '../components/WhatsAppFloat';
 import { motion } from 'framer-motion';
 
 // HeroCinematic: realistic procedural R3F sedan + drei Lightformer environment
@@ -311,7 +312,7 @@ export default function Home() {
             "image": "https://cy-car-rental.vercel.app/logo.png",
             "description": "Premium car rental service in Cyprus offering luxury and economy vehicles",
             "url": "https://cy-car-rental.vercel.app",
-            "telephone": "+357-XXXXXXX",
+            "telephone": WHATSAPP_NUMBER,
             "areaServed": "CY",
             "priceRange": "$$",
             "sameAs": [
@@ -606,6 +607,9 @@ export default function Home() {
             <a href={`tel:${WHATSAPP_NUMBER}`} className={styles.phoneLink}>{WHATSAPP_NUMBER}</a>
           </p>
         </footer>
+
+        {/* Floating WhatsApp CTA — appears after scroll past hero */}
+        <WhatsAppFloat language={lang} />
       </div>
     </>
   );
