@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
   Float, ContactShadows, Sparkles, Stars,
   RoundedBox, Environment, Lightformer, MeshReflectorMaterial,
+  useGLTF,
 } from '@react-three/drei';
 import {
   motion, useScroll, useTransform, useSpring,
@@ -273,6 +274,69 @@ function SculptCar() {
     </group>
   );
 }
+
+/* ─────────────────── Real GLB Ferrari (replaces SculptCar) ─────────────────── */
+
+// three.js sample model — MIT licensed, served from /public/models/ferrari.glb
+// Wheel/body part names from the official three.js webgl_loader_gltf demo.
+function Ferrari() {
+  const { scene } = useGLTF('/models/ferrari.glb');
+  const wheelsRef = useRef([]);
+
+  useEffect(() => {
+    if (!scene) return;
+    // Body car-paint material override → cinematic deep paint w/ clearcoat
+    const bodyMat = new THREE.MeshPhysicalMaterial({
+      color: '#0b0d18',
+      metalness: 1.0,
+      roughness: 0.35,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.04,
+      envMapIntensity: 1.5,
+    });
+    // Detail trim — chromey
+    const detailsMat = new THREE.MeshStandardMaterial({
+      color: '#cdcdd5', metalness: 1.0, roughness: 0.45, envMapIntensity: 1.4,
+    });
+    // Glass
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      color: '#1a1f2e',
+      metalness: 0.1, roughness: 0.04,
+      transmission: 0.9, thickness: 0.5, ior: 1.45,
+      transparent: true, opacity: 0.85, envMapIntensity: 1.2,
+    });
+
+    scene.traverse((obj) => {
+      if (!obj.isMesh) return;
+      obj.castShadow = true;
+      obj.receiveShadow = true;
+      const n = (obj.name || '').toLowerCase();
+      if (n === 'body' || n.includes('body')) obj.material = bodyMat;
+      else if (n === 'glass' || n.includes('glass')) obj.material = glassMat;
+      else if (n.includes('rim') || n.includes('trim')) obj.material = detailsMat;
+    });
+
+    wheelsRef.current = ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr']
+      .map((nm) => scene.getObjectByName(nm))
+      .filter(Boolean);
+  }, [scene]);
+
+  // Slow wheel spin so it doesn't feel like a static photo
+  useFrame((_, delta) => {
+    wheelsRef.current.forEach((w) => { if (w) w.rotation.x += delta * 0.6; });
+  });
+
+  return (
+    <primitive
+      object={scene}
+      scale={[2.4, 2.4, 2.4]}
+      position={[0, -0.5, 0]}
+      rotation={[0, Math.PI / 4, 0]}
+    />
+  );
+}
+
+useGLTF.preload('/models/ferrari.glb');
 
 /* ─────────────────── Mirror floor ─────────────────── */
 
@@ -654,8 +718,10 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
               <Sparkles count={60} scale={[10, 6, 10]} size={2} speed={0.25} color="#fde68a" />
 
               <CinematicRig>
-                <Float speed={1.2} rotationIntensity={0.15} floatIntensity={0.25}>
-                  <SculptCar />
+                <Float speed={1.0} rotationIntensity={0.08} floatIntensity={0.18}>
+                  <Suspense fallback={<SculptCar />}>
+                    <Ferrari />
+                  </Suspense>
                 </Float>
                 <MirrorFloor />
                 <ContactShadows position={[0, -0.49, 0]} opacity={0.7} scale={12} blur={2.5} far={4.5} />
