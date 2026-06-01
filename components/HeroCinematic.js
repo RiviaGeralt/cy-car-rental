@@ -280,7 +280,7 @@ function SculptCar() {
 // three.js sample model — MIT licensed, served from /public/models/ferrari.glb
 // Wheel/body part names from the official three.js webgl_loader_gltf demo.
 function Ferrari() {
-  const { scene } = useGLTF('/models/ferrari.glb');
+  const { scene } = useGLTF('/models/ferrari.glb', '/draco/');
   const wheelsRef = useRef([]);
 
   useEffect(() => {
@@ -336,7 +336,7 @@ function Ferrari() {
   );
 }
 
-useGLTF.preload('/models/ferrari.glb');
+useGLTF.preload('/models/ferrari.glb', '/draco/');
 
 /* ─────────────────── Mirror floor ─────────────────── */
 
