@@ -343,7 +343,8 @@ function MagneticCTA({ children, onClick, className }) {
 /* ─────────────────── Main ─────────────────── */
 
 const HeroCinematic = ({ language = 'en', onCTA }) => {
-  const [supports3D, setSupports3D] = useState(true);
+  // null = not yet detected (prevents flash on mobile)
+  const [supports3D, setSupports3D] = useState(null);
   const wrapRef = useRef(null);
 
   const { scrollY } = useScroll();
@@ -354,7 +355,10 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
     if (typeof window === 'undefined') return;
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const lowMem = navigator.deviceMemory && navigator.deviceMemory < 4;
-    if (reduced || lowMem) setSupports3D(false);
+    // Disable WebGL on ALL touch/mobile devices — biggest perf win
+    const isMobile = window.matchMedia?.('(pointer: coarse)').matches;
+    if (reduced || lowMem || isMobile) { setSupports3D(false); return; }
+    setSupports3D(true);
     const handler = (e) => {
       console.warn('[HeroCinematic] WebGL context lost');
       setSupports3D(false);
@@ -545,8 +549,8 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
       {/* Layer 0 — CSS animated aurora background (always visible) */}
       <div className="hc-bg" />
 
-      {/* Layer 1 — WebGL 3D canvas */}
-      {supports3D ? (
+      {/* Layer 1 — WebGL 3D canvas (desktop only, null = still detecting) */}
+      {supports3D === true ? (
         <div className="hc-canvas">
           <Canvas
             camera={{ position: [8.0, 2.0, 8.0], fov: 52 }}
@@ -601,9 +605,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             </Suspense>
           </Canvas>
         </div>
-      ) : (
-        <div className="hc-fallback" aria-hidden="true">🚗</div>
-      )}
+      ) : null /* mobile: CSS aurora hero only — smooth, no WebGL */}
 
       {/* Layer 2 — vignette overlay */}
       <div className="hc-vignette" />

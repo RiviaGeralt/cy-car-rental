@@ -2,167 +2,131 @@ import React from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 
 /**
- * ScrollBackdrop — site-wide animated parallax background.
+ * ScrollBackdrop v2 — "video-like" cinematic background.
  *
- * FIX: was z-index:-1 which html{background:#050510} buried (canvas paint
- * happens before z-index:<0 in root stacking context on some browsers).
- * Now z-index:0. .container in Home.module.css must be position:relative; z-index:1.
+ * Each orb moves in X + Y + Scale + Opacity as you scroll,
+ * creating a camera-pan-through-colored-light scene:
+ *   • Top of page: purple/violet dominates (cool, night-sky)
+ *   • Mid-scroll:  orange sweeps through center (warm, sunset)
+ *   • Bottom:      gold/yellow rises and blooms (sunrise, CTA warmth)
  *
- * Orbs are viewport-relative (position:fixed base) so they stay visible
- * throughout the whole page. Parallax at 3 speeds creates depth on scroll.
- * CSS @keyframes breathe even at rest.
+ * Aurora rotates 180° across the full page — barely conscious but feels alive.
+ * Mobile: reduce blur radius via media query (GPU savings, no JS needed).
+ * Uses scrollYProgress (0→1) so animation spans the FULL page regardless of height.
  */
 const ScrollBackdrop = () => {
-  const { scrollY } = useScroll();
+  const { scrollYProgress } = useScroll();
+  // Spring lags slightly behind scroll — feels like the scene is "floating"
+  const sp = useSpring(scrollYProgress, { stiffness: 55, damping: 22, mass: 0.6 });
 
-  // Tighter range = parallax visible on ~2000px page
-  const sy = useSpring(scrollY, { stiffness: 70, damping: 28, mass: 0.4 });
+  /* ── Purple (top-left, hero zone) — retreats upper-right, shrinks, fades ── */
+  const pX = useTransform(sp, [0, 1], ['0vw',  '35vw']);
+  const pY = useTransform(sp, [0, 1], ['0vh', '-30vh']);
+  const pS = useTransform(sp, [0, 0.5, 1], [1.05, 0.90, 0.58]);
+  const pO = useTransform(sp, [0, 0.45, 1], [0.92, 0.70, 0.28]);
 
-  const yFar  = useTransform(sy, [0, 1800], [0, -160]);
-  const yMid  = useTransform(sy, [0, 1800], [0, -380]);
-  const yNear = useTransform(sy, [0, 1800], [0, -680]);
-  const rotAur = useTransform(sy, [0, 1800], [0, 35]);
+  /* ── Orange (right side) — sweeps left and up, peaks mid-scroll ── */
+  const oX = useTransform(sp, [0, 1], ['15vw', '-28vw']);
+  const oY = useTransform(sp, [0, 0.5, 1], ['8vh', '-8vh', '-24vh']);
+  const oS = useTransform(sp, [0, 0.4, 1], [0.72, 1.20, 0.95]);
+  const oO = useTransform(sp, [0, 0.25, 0.65, 1], [0.45, 0.88, 0.92, 0.52]);
+
+  /* ── Yellow (bottom) — rises through the page, dominant at the end ── */
+  const yX = useTransform(sp, [0, 1], ['0vw',  '12vw']);
+  const yY = useTransform(sp, [0, 1], ['0vh', '-62vh']);
+  const yS = useTransform(sp, [0, 0.5, 1], [0.52, 0.90, 1.32]);
+  const yO = useTransform(sp, [0, 0.4, 0.7, 1], [0.22, 0.60, 0.88, 0.98]);
+
+  /* ── Violet accent (upper-right) — drifts left, fades at bottom ── */
+  const vX = useTransform(sp, [0, 1], ['0vw', '-28vw']);
+  const vY = useTransform(sp, [0, 1], ['0vh',  '-8vh']);
+  const vO = useTransform(sp, [0, 0.5, 1], [0.78, 0.88, 0.18]);
+
+  /* ── Aurora conic — rotates 180° and shifts opacity through page ── */
+  const aRot = useTransform(sp, [0, 1], [0, 180]);
+  const aO   = useTransform(sp, [0, 0.5, 1], [0.52, 0.72, 0.40]);
 
   return (
     <div className="sb-wrap" aria-hidden="true">
       <style jsx>{`
-        /* ── z-index:0 — sits above html canvas bg, below container (z:1) ── */
         .sb-wrap {
-          position: fixed;
-          inset: 0;
-          z-index: 0;
-          pointer-events: none;
-          overflow: hidden;
-          background: #050510;
+          position: fixed; inset: 0;
+          z-index: 0; pointer-events: none;
+          overflow: hidden; background: #050510;
+          contain: paint;
         }
-        .sb-layer {
-          position: absolute;
-          inset: -25%;
-          will-change: transform;
+        .orb {
+          position: absolute; border-radius: 50%;
+          will-change: transform, opacity;
         }
-
-        /* ── Orbs ── */
-        .orb { position: absolute; border-radius: 50%; }
-
-        /* Far — large, slow, heavy blur */
-        .far-1 {
-          width: 65vw; height: 65vw; left: -12%; top: 8%;
-          background: radial-gradient(circle, rgba(124,58,237,0.70), transparent 68%);
-          filter: blur(90px);
-          animation: sbBreath1 12s ease-in-out infinite alternate;
+        /*
+         * Orbs are LARGE (80-95vw) — they fill most of the viewport.
+         * When framer moves them X+Y+Scale, the COLOR FIELD itself
+         * sweeps across the screen → "video" / camera-pan feel.
+         */
+        .o-purple {
+          width: 95vw; height: 95vw;
+          left: -15%; top: -20%;
+          background: radial-gradient(circle, rgba(124,58,237,0.92) 0%, transparent 65%);
+          filter: blur(88px);
         }
-        .far-2 {
-          width: 55vw; height: 55vw; right: -8%; top: 55%;
-          background: radial-gradient(circle, rgba(249,115,22,0.60), transparent 68%);
-          filter: blur(90px);
-          animation: sbBreath2 15s ease-in-out infinite alternate-reverse;
+        .o-orange {
+          width: 78vw; height: 78vw;
+          right: -14%; top: 15%;
+          background: radial-gradient(circle, rgba(249,115,22,0.88) 0%, transparent 65%);
+          filter: blur(82px);
         }
-        .far-3 {
-          width: 60vw; height: 60vw; left: 22%; top: 78%;
-          background: radial-gradient(circle, rgba(250,204,21,0.45), transparent 68%);
-          filter: blur(90px);
-          animation: sbBreath1 18s ease-in-out infinite alternate;
+        .o-yellow {
+          width: 82vw; height: 82vw;
+          left: 5%; bottom: -25%;
+          background: radial-gradient(circle, rgba(250,204,21,0.82) 0%, transparent 65%);
+          filter: blur(82px);
         }
-
-        /* Mid — medium, medium blur */
-        .mid-1 {
-          width: 38vw; height: 38vw; left: 58%; top: 12%;
-          background: radial-gradient(circle, rgba(167,139,250,0.70), transparent 68%);
-          filter: blur(65px);
-          animation: sbBreath2 10s ease-in-out infinite alternate;
+        .o-violet {
+          width: 46vw; height: 46vw;
+          left: 48%; top: 2%;
+          background: radial-gradient(circle, rgba(167,139,250,0.92) 0%, transparent 65%);
+          filter: blur(68px);
         }
-        .mid-2 {
-          width: 30vw; height: 30vw; left: 6%; top: 52%;
-          background: radial-gradient(circle, rgba(249,115,22,0.65), transparent 68%);
-          filter: blur(65px);
-          animation: sbBreath1 13s ease-in-out infinite alternate-reverse;
-        }
-        .mid-3 {
-          width: 34vw; height: 34vw; left: 62%; top: 72%;
-          background: radial-gradient(circle, rgba(250,204,21,0.55), transparent 68%);
-          filter: blur(65px);
-          animation: sbBreath2 16s ease-in-out infinite alternate;
-        }
-
-        /* Near — small, sharp, fast parallax */
-        .near-1 {
-          width: 20vw; height: 20vw; left: 32%; top: 22%;
-          background: radial-gradient(circle, rgba(250,204,21,0.80), transparent 62%);
-          filter: blur(45px);
-          animation: sbBreath1 8s ease-in-out infinite alternate;
-        }
-        .near-2 {
-          width: 16vw; height: 16vw; left: 74%; top: 58%;
-          background: radial-gradient(circle, rgba(249,115,22,0.85), transparent 62%);
-          filter: blur(45px);
-          animation: sbBreath2 11s ease-in-out infinite alternate-reverse;
-        }
-        .near-3 {
-          width: 22vw; height: 22vw; left: 8%; top: 82%;
-          background: radial-gradient(circle, rgba(167,139,250,0.75), transparent 62%);
-          filter: blur(45px);
-          animation: sbBreath1 14s ease-in-out infinite alternate;
-        }
-
-        /* Aurora conic sweep */
         .aurora {
-          position: absolute; inset: -30%;
+          position: absolute; inset: -40%;
           background: conic-gradient(from 0deg at 50% 50%,
             transparent 0deg,
-            rgba(250,204,21,0.22) 90deg,
-            rgba(249,115,22,0.28) 180deg,
-            rgba(124,58,237,0.22) 270deg,
+            rgba(250,204,21,0.14) 60deg,
+            rgba(249,115,22,0.20) 130deg,
+            rgba(124,58,237,0.14) 210deg,
+            transparent 280deg,
+            rgba(167,139,250,0.10) 340deg,
             transparent 360deg);
-          filter: blur(80px);
+          filter: blur(110px);
           mix-blend-mode: screen;
-          opacity: 0.65;
+          will-change: transform, opacity;
         }
-
-        /* Breathing keyframes — GPU only (scale + opacity) */
-        @keyframes sbBreath1 {
-          0%   { opacity: 0.75; transform: scale(0.95); }
-          100% { opacity: 1;    transform: scale(1.05); }
-        }
-        @keyframes sbBreath2 {
-          0%   { opacity: 0.65; transform: scale(1.02) translateX(-2%); }
-          100% { opacity: 0.95; transform: scale(0.97) translateX(2%); }
-        }
-
         .sb-grain {
           position: absolute; inset: 0; pointer-events: none;
-          opacity: 0.045; mix-blend-mode: overlay;
+          opacity: 0.036; mix-blend-mode: overlay;
           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
         }
-
+        /* Mobile: halve blur — GPU is smaller, savings are real */
+        @media (max-width: 768px) {
+          .o-purple, .o-orange, .o-yellow { filter: blur(48px); }
+          .o-violet { filter: blur(36px); }
+          .aurora { filter: blur(65px); }
+          .sb-grain { display: none; }
+        }
         @media (prefers-reduced-motion: reduce) {
-          .sb-layer { transform: none !important; }
-          .orb { animation: none !important; }
+          .sb-wrap * { animation: none !important; transition: none !important; }
         }
       `}</style>
 
-      {/* Aurora — rotates with scroll */}
-      <motion.div className="sb-layer aurora" style={{ rotate: rotAur }} />
+      {/* Aurora sweep — rotates across the full page */}
+      <motion.div className="aurora" style={{ rotate: aRot, opacity: aO }} />
 
-      {/* Far — slowest parallax */}
-      <motion.div className="sb-layer" style={{ y: yFar }}>
-        <div className="orb far-1" />
-        <div className="orb far-2" />
-        <div className="orb far-3" />
-      </motion.div>
-
-      {/* Mid — medium parallax */}
-      <motion.div className="sb-layer" style={{ y: yMid }}>
-        <div className="orb mid-1" />
-        <div className="orb mid-2" />
-        <div className="orb mid-3" />
-      </motion.div>
-
-      {/* Near — fastest parallax */}
-      <motion.div className="sb-layer" style={{ y: yNear }}>
-        <div className="orb near-1" />
-        <div className="orb near-2" />
-        <div className="orb near-3" />
-      </motion.div>
+      {/* Orbs — each pans in X+Y+Scale+Opacity creating scene-shift feel */}
+      <motion.div className="orb o-purple" style={{ x: pX, y: pY, scale: pS, opacity: pO }} />
+      <motion.div className="orb o-orange" style={{ x: oX, y: oY, scale: oS, opacity: oO }} />
+      <motion.div className="orb o-yellow" style={{ x: yX, y: yY, scale: yS, opacity: yO }} />
+      <motion.div className="orb o-violet" style={{ x: vX, y: vY, opacity: vO }} />
 
       <div className="sb-grain" />
     </div>
