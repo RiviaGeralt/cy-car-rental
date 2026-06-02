@@ -50,10 +50,14 @@
 .subtitle {
   font-size: 1.1rem;
   font-weight: 400;
-  opacity: 0.85;
+  opacity: 1;
   letter-spacing: 0.5px;
-  color: #b0b9c3;
+  color: #d0d8e0;
   animation: fadeInUp 0.8s ease-out 0.2s both;
+  line-height: 1.6;
+}
+@media (prefers-reduced-motion: reduce) {
+  .subtitle { animation: none; }
 }
 
 /* Hero */
@@ -285,12 +289,25 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
   box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .inquireBtn:hover {
   background: linear-gradient(135deg, #00ffff 0%, #00ccff 100%);
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(0, 212, 255, 0.5);
+}
+
+.inquireBtn:focus {
+  outline: 3px solid rgba(0, 212, 255, 0.5);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inquireBtn { transition: none; }
 }
 
 /* CTA Section */
@@ -318,10 +335,11 @@
 
 .cta p {
   font-size: 1.1rem;
-  opacity: 0.85;
+  opacity: 1;
   margin-bottom: 40px;
   font-weight: 400;
-  color: #b0b9c3;
+  color: #d0d8e0;
+  line-height: 1.6;
 }
 
 .ctaButton {
@@ -336,12 +354,25 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
   box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ctaButton:hover {
   background: linear-gradient(135deg, #ffb700 0%, #d4af37 100%);
   transform: translateY(-3px);
   box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+}
+
+.ctaButton:focus {
+  outline: 3px solid rgba(212, 175, 55, 0.5);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaButton { transition: none; }
 }
 
 .ctaButtons {
@@ -362,6 +393,10 @@
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ctaButtonSecondary:hover {
@@ -369,6 +404,15 @@
   color: #0f0f1e;
   transform: translateY(-3px);
   box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+}
+
+.ctaButtonSecondary:focus {
+  outline: 3px solid rgba(212, 175, 55, 0.5);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaButtonSecondary { transition: none; }
 }
 
 /* Footer */
@@ -481,13 +525,26 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
   min-width: 140px;
+  min-height: 44px;
   box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .langModalBtn:hover {
   background: linear-gradient(135deg, #00ffff 0%, #00ccff 100%);
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(0, 212, 255, 0.5);
+}
+
+.langModalBtn:focus {
+  outline: 2px solid rgba(0, 212, 255, 0.5);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .langModalBtn { transition: none; }
 }
 
 /* Side Language Switcher */
@@ -622,10 +679,11 @@
 
 .form input:focus,
 .form textarea:focus {
-  outline: none;
-  border-color: rgba(0, 212, 255, 0.6);
+  outline: 2px solid rgba(0, 212, 255, 0.7);
+  outline-offset: 2px;
+  border-color: rgba(0, 212, 255, 0.8);
   background: rgba(0, 212, 255, 0.05);
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.1);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.15);
 }
 
 .form textarea {
@@ -644,12 +702,25 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .submitBtn:hover {
   background: linear-gradient(135deg, #ffb700 0%, #d4af37 100%);
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(212, 175, 55, 0.5);
+}
+
+.submitBtn:focus {
+  outline: 2px solid rgba(212, 175, 55, 0.5);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submitBtn { transition: none; }
 }
 
 .whatsappBtn {
@@ -663,12 +734,25 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .whatsappBtn:hover {
   background: linear-gradient(135deg, #20BA5A 0%, #1a9b4b 100%);
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
+}
+
+.whatsappBtn:focus {
+  outline: 2px solid rgba(37, 211, 102, 0.5);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whatsappBtn { transition: none; }
 }
 
 /* Testimonials & Benefits Sections */
@@ -888,6 +972,14 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Disable animations for motion sensitivity */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes float { 0%, 100% { transform: none; } 50% { transform: none; } }
+  @keyframes fadeInDown { from { transform: none; } to { transform: none; } }
+  @keyframes fadeInUp { from { transform: none; } to { transform: none; } }
+  @keyframes slideUp { from { transform: none; } to { transform: none; } }
 }
 
 /* Mobile Responsive */
