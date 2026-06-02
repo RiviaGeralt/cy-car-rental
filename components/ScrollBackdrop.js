@@ -23,7 +23,7 @@ const ScrollBackdrop = () => {
   const bgColor = useTransform(
     sp,
     [0, 0.25, 0.5, 0.75, 1],
-    ['#120730', '#021e30', '#2e0d00', '#280028', '#2a1900']
+    ['#2e1065', '#0e3d52', '#5c2000', '#4a0550', '#4a2800']
   );
 
   /* ── Orb 1 — large, sweeps left→right across page ── */
