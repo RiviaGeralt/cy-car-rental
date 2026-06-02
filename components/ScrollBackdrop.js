@@ -60,11 +60,12 @@ const ScrollBackdrop = () => {
   const vigOp = useTransform(sp, [0, 1], [0.35, 0.55]);
 
   // ── Wheel rotation (direct DOM write — bypasses React, hits 60fps) ─
+  // Pivots match wheel centers after car shift: back=840, front=1080 at y=800
   useMotionValueEvent(sp, 'change', (raw) => {
     const t = Math.max(0, Math.min(1, raw));
     const deg = t * 1080; // 3 full rotations across the page
-    if (wheelFront.current) wheelFront.current.setAttribute('transform', `rotate(${deg} 1280 800)`);
-    if (wheelBack.current)  wheelBack.current.setAttribute('transform',  `rotate(${deg} 1040 800)`);
+    if (wheelFront.current) wheelFront.current.setAttribute('transform', `rotate(${deg} 1080 800)`);
+    if (wheelBack.current)  wheelBack.current.setAttribute('transform',  `rotate(${deg} 840 800)`);
   });
 
   return (
@@ -72,8 +73,11 @@ const ScrollBackdrop = () => {
       aria-hidden="true"
       style={{
         position: 'fixed',
-        inset: 0,
-        zIndex: 0,
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: -1, // sits behind .container (z:1); skill 04 spec
         pointerEvents: 'none',
         overflow: 'hidden',
         background: 'linear-gradient(180deg,#050510 0%, #0a1428 55%, #1a3a5c 100%)',
@@ -82,7 +86,9 @@ const ScrollBackdrop = () => {
       <motion.svg
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid slice"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', y: yBob }}
+        width="100%"
+        height="100%"
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', y: yBob, display: 'block' }}
       >
         <defs>
           <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
@@ -190,36 +196,36 @@ const ScrollBackdrop = () => {
           ))}
         </motion.g>
 
-        {/* ── FOREGROUND: anchored sedan (side profile) ── */}
+        {/* ── FOREGROUND: anchored sedan (side profile, centered at x≈960) ── */}
         <g>
           {/* Headlight cone — sweeps the road ahead */}
-          <ellipse cx="1420" cy="780" rx="260" ry="40" fill="url(#headlight)" />
+          <ellipse cx="1220" cy="780" rx="260" ry="40" fill="url(#headlight)" />
           {/* Ground shadow */}
-          <ellipse cx="1160" cy="858" rx="320" ry="14" fill="rgba(0,0,0,0.55)" />
+          <ellipse cx="960" cy="858" rx="320" ry="14" fill="rgba(0,0,0,0.55)" />
 
           {/* Lower body */}
           <path
-            d="M 820 780 L 880 740 L 1020 720 L 1140 700 L 1320 700
-               L 1420 720 L 1480 750 L 1500 790 L 1480 820 L 840 820 Z"
+            d="M 620 780 L 680 740 L 820 720 L 940 700 L 1120 700
+               L 1220 720 L 1280 750 L 1300 790 L 1280 820 L 640 820 Z"
             fill="url(#carBody)" stroke="#5a4612" strokeWidth="1.5"
           />
           {/* Greenhouse (windows) */}
-          <path d="M 980 720 L 1060 660 L 1280 660 L 1340 720 Z"
+          <path d="M 780 720 L 860 660 L 1080 660 L 1140 720 Z"
                 fill="#0a1428" stroke="#5a4612" strokeWidth="1.5" />
-          <path d="M 1000 715 L 1070 668 L 1180 668 L 1170 715 Z" fill="rgba(0,212,255,0.18)" />
+          <path d="M 800 715 L 870 668 L 980 668 L 970 715 Z" fill="rgba(0,212,255,0.18)" />
           {/* Door seam + handle */}
-          <line x1="1180" y1="720" x2="1180" y2="790" stroke="#5a4612" strokeWidth="1" />
-          <rect x="1210" y="755" width="22" height="3" rx="1" fill="#f1cf5a" />
+          <line x1="980" y1="720" x2="980" y2="790" stroke="#5a4612" strokeWidth="1" />
+          <rect x="1010" y="755" width="22" height="3" rx="1" fill="#f1cf5a" />
           {/* Lights */}
-          <ellipse cx="1465" cy="765" rx="14" ry="8" fill="#fffce0" />
-          <rect x="850" y="755" width="10" height="14" rx="2" fill="#ff3a3a" opacity="0.9" />
+          <ellipse cx="1265" cy="765" rx="14" ry="8" fill="#fffce0" />
+          <rect x="650" y="755" width="10" height="14" rx="2" fill="#ff3a3a" opacity="0.9" />
           {/* Wheel wells */}
-          <circle cx="1040" cy="800" r="55" fill="#05070b" />
-          <circle cx="1280" cy="800" r="55" fill="#05070b" />
+          <circle cx="840" cy="800" r="55" fill="#05070b" />
+          <circle cx="1080" cy="800" r="55" fill="#05070b" />
 
           {/* Spinning wheels (direct-DOM rotation via ref) */}
           <g ref={wheelBack}>
-            <g transform="translate(1040 800)">
+            <g transform="translate(840 800)">
               <circle r="46" fill="#0a0a0e" stroke="#2a3340" strokeWidth="2" />
               <circle r="20" fill="#1a1f28" />
               {[0,60,120,180,240,300].map((a)=>(
@@ -229,7 +235,7 @@ const ScrollBackdrop = () => {
             </g>
           </g>
           <g ref={wheelFront}>
-            <g transform="translate(1280 800)">
+            <g transform="translate(1080 800)">
               <circle r="46" fill="#0a0a0e" stroke="#2a3340" strokeWidth="2" />
               <circle r="20" fill="#1a1f28" />
               {[0,60,120,180,240,300].map((a)=>(
