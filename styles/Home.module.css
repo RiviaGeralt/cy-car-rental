@@ -1,6 +1,8 @@
 .container {
   min-height: 100vh;
-  /* transparent so fixed ScrollBackdrop (z:-1) shows through every section */
+  /* z-index:1 sits above ScrollBackdrop (z:0); transparent bg lets orbs show */
+  position: relative;
+  z-index: 1;
   background: transparent;
   color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
