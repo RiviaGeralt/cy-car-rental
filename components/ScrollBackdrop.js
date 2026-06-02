@@ -1,152 +1,346 @@
-import React from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import React, { useRef, useEffect, useState } from 'react';
+import { useScroll, useSpring, useMotionValueEvent } from 'framer-motion';
 
 /**
- * ScrollBackdrop v6 — brand-matched, scroll-driven.
+ * ScrollBackdrop v7 — Cyprus road journey.
  *
- * Site colors: cyan #00d4ff + gold #d4af37 on deep navy.
- * Two large brand-colored orbs travel dramatically across the page as you scroll.
- * Background stays deep navy throughout; orbs provide the vivid color shift.
+ * A top-down night scene of a winding Cyprus coastal road.
+ * A gold car (matching brand color #d4af37) drives along the road
+ * as you scroll — each website section is a glowing stop marker on the route.
  *
- * Effect:
- *   Hero     → cyan orb top-left  + gold orb bottom-right
- *   Fleet    → cyan sweeps right,  gold rises left
- *   Reviews  → gold dominates center (warm, trust)
- *   Benefits → cyan returns top,   gold fades bottom
- *   CTA      → gold bloom center   (warmth, conversion)
+ * Technique: SVG path + getPointAtLength + direct DOM attribute updates
+ * (no setState = no re-renders = smooth 60fps animation).
  *
- * CSS animation-timeline drives bg-color as fallback tint layer.
+ * Scene: night sky, crescent moon, stars, dark Mediterranean sea (right),
+ * terrain/hills (left), cypress trees, coastal town, winding road.
+ *
+ * Car scales down as it moves toward the horizon (depth illusion).
+ * Stop markers glow at section positions (0 / 25 / 50 / 75 / 100%).
  */
-const ScrollBackdrop = () => {
+
+// Road path: bottom-center → winding → top-center (same road the whole way)
+const ROAD_D =
+  'M 960 1050 C 820 880 1100 760 940 630 C 780 500 1160 400 1020 280 C 880 160 1050 80 960 0';
+
+// t values for section stops along the road
+const STOP_TS = [0, 0.25, 0.5, 0.75, 1.0];
+const STOP_LABELS = ['Start', 'Fleet', 'Reviews', 'Benefits', 'Contact'];
+
+// Deterministic star positions (no random on render)
+function makeStars(n) {
+  const s = [];
+  for (let i = 0; i < n; i++) {
+    s.push({
+      x: (i * 1543 + 712) % 1920,
+      y: (i * 937 + 231) % 480,
+      r: i % 4 === 0 ? 1.8 : i % 3 === 0 ? 1.2 : 0.8,
+      o: 0.20 + (i % 7) * 0.11,
+    });
+  }
+  return s;
+}
+const STARS = makeStars(90);
+
+export default function ScrollBackdrop() {
   const { scrollYProgress } = useScroll();
-  const sp = useSpring(scrollYProgress, { stiffness: 55, damping: 22, mass: 0.6 });
+  const sp = useSpring(scrollYProgress, { stiffness: 55, damping: 22, mass: 0.5 });
 
-  /* ── Cyan orb (primary brand color) ── */
-  const cX = useTransform(sp, [0, 0.25, 0.5, 0.75, 1], ['-10vw', '50vw',  '80vw', '10vw', '30vw']);
-  const cY = useTransform(sp, [0, 0.25, 0.5, 0.75, 1], ['-10vh', '20vh',  '50vh', '5vh',  '30vh']);
-  const cS = useTransform(sp, [0, 0.25, 0.5, 0.75, 1], [1.2, 0.9, 0.7, 1.3, 1.0]);
-  const cO = useTransform(sp, [0, 0.1, 0.5, 0.8, 1],   [0,   0.9, 0.5, 0.9, 0.4]);
+  const pathRef = useRef(null);
+  const carRef  = useRef(null);
+  const glowRef = useRef(null);
+  const [stops, setStops] = useState([]);
 
-  /* ── Gold orb (secondary brand color) ── */
-  const gX = useTransform(sp, [0, 0.25, 0.5, 0.75, 1], ['55vw', '10vw', '15vw', '60vw', '20vw']);
-  const gY = useTransform(sp, [0, 0.25, 0.5, 0.75, 1], ['55vh', '40vh', '20vh', '50vh', '35vh']);
-  const gS = useTransform(sp, [0, 0.25, 0.5, 0.75, 1], [0.8, 1.1, 1.5, 0.9, 1.4]);
-  const gO = useTransform(sp, [0, 0.1, 0.4, 0.65, 1],  [0,   0.5, 0.9, 0.8, 1.0]);
+  // Compute stop positions on the road after mount
+  useEffect(() => {
+    const p = pathRef.current;
+    if (!p) return;
+    const len = p.getTotalLength();
+    setStops(
+      STOP_TS.map((t, i) => {
+        const pt = p.getPointAtLength(t * len);
+        return { x: pt.x, y: pt.y, label: STOP_LABELS[i] };
+      })
+    );
+    // Set initial car position
+    const pt0 = p.getPointAtLength(0);
+    const pt1 = p.getPointAtLength(3);
+    const a0 = Math.atan2(pt1.y - pt0.y, pt1.x - pt0.x) * (180 / Math.PI);
+    if (carRef.current) {
+      carRef.current.setAttribute(
+        'transform',
+        `translate(${pt0.x},${pt0.y}) rotate(${a0 + 90}) scale(1)`
+      );
+    }
+    if (glowRef.current) {
+      glowRef.current.setAttribute('transform', `translate(${pt0.x},${pt0.y}) rotate(${a0 + 90})`);
+    }
+  }, []);
 
-  /* ── Small teal accent orb ── */
-  const aX = useTransform(sp, [0, 0.5, 1], ['25vw', '65vw', '10vw']);
-  const aY = useTransform(sp, [0, 0.5, 1], ['40vh', '10vh', '70vh']);
-  const aS = useTransform(sp, [0, 0.5, 1], [0.6, 1.0, 0.8]);
+  // Animate car along road on scroll (direct DOM — no re-render = 60fps)
+  useMotionValueEvent(sp, 'change', (raw) => {
+    const p   = pathRef.current;
+    const car = carRef.current;
+    const gl  = glowRef.current;
+    if (!p || !car) return;
 
-  /* ── Aurora ── */
-  const aRot = useTransform(sp, [0, 1], [0, 360]);
+    const t    = Math.max(0, Math.min(1, raw));
+    const len  = p.getTotalLength();
+    const dist = t * len;
+    const pt   = p.getPointAtLength(dist);
+    const pt2  = p.getPointAtLength(Math.min(dist + 3, len));
+
+    // Angle car along road direction
+    const angle = Math.atan2(pt2.y - pt.y, pt2.x - pt.x) * (180 / Math.PI);
+
+    // Car shrinks as it moves toward horizon (t=0 bottom/large → t=1 top/small)
+    const scale = 1.0 - t * 0.65;
+
+    car.setAttribute(
+      'transform',
+      `translate(${pt.x},${pt.y}) rotate(${angle + 90}) scale(${scale})`
+    );
+    if (gl) {
+      gl.setAttribute(
+        'transform',
+        `translate(${pt.x},${pt.y}) rotate(${angle + 90}) scale(${scale})`
+      );
+    }
+  });
 
   return (
-    <div className="sb-wrap" aria-hidden="true">
-      <style jsx>{`
-        /* Subtle tint shift matching brand colors */
-        @keyframes bg-tint {
-          0%   { background-color: #04111a; }   /* cyan-tinted dark */
-          25%  { background-color: #06181a; }   /* teal-dark */
-          50%  { background-color: #1a1004; }   /* gold-tinted dark */
-          75%  { background-color: #04101a; }   /* back to cool */
-          100% { background-color: #1a1200; }   /* warm gold dark */
-        }
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'fixed', inset: 0,
+        zIndex: 0, pointerEvents: 'none',
+        overflow: 'hidden', background: '#04080f',
+      }}
+    >
+      <svg
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid slice"
+        style={{ width: '100%', height: '100%', display: 'block' }}
+      >
+        <defs>
+          <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#02040c" />
+            <stop offset="55%"  stopColor="#060d1e" />
+            <stop offset="100%" stopColor="#04111a" />
+          </linearGradient>
+          <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#041e30" />
+            <stop offset="100%" stopColor="#020c18" />
+          </linearGradient>
+          <linearGradient id="terrainG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#040c04" />
+            <stop offset="100%" stopColor="#091508" />
+          </linearGradient>
+          <radialGradient id="vigG" cx="50%" cy="50%" r="72%">
+            <stop offset="45%" stopColor="transparent" />
+            <stop offset="100%" stopColor="rgba(0,0,0,0.82)" />
+          </radialGradient>
+          <radialGradient id="moonGlowG" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor="rgba(230,220,180,0.08)" />
+            <stop offset="100%" stopColor="transparent" />
+          </radialGradient>
+          {/* Soft blur for glow effects */}
+          <filter id="softBlur" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="18" />
+          </filter>
+          <filter id="stopGlowF" x="-150%" y="-150%" width="400%" height="400%">
+            <feGaussianBlur stdDeviation="7" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <filter id="carShadow" x="-60%" y="-60%" width="220%" height="220%">
+            <feDropShadow dx="0" dy="5" stdDeviation="10" floodColor="rgba(0,0,0,0.8)" />
+          </filter>
+          <filter id="roadEdgeGlow" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur stdDeviation="3" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
 
-        .sb-wrap {
-          position: fixed;
-          inset: 0;
-          z-index: 0;
-          pointer-events: none;
-          overflow: hidden;
-          background-color: #04111a;
-          animation: bg-tint linear both;
-          animation-timeline: scroll(root block);
-        }
+        {/* ── Sky ── */}
+        <rect width="1920" height="1080" fill="url(#skyG)" />
 
-        .orb {
-          position: absolute;
-          top: 0; left: 0;
-          border-radius: 50%;
-          will-change: transform, opacity;
-        }
+        {/* ── Stars ── */}
+        {STARS.map(({ x, y, r, o }, i) => (
+          <circle key={i} cx={x} cy={y} r={r} fill="white" opacity={o} />
+        ))}
 
-        /* Cyan orb — brand primary */
-        .o-cyan {
-          width: 100vw; height: 100vw;
-          background: radial-gradient(circle,
-            rgba(0, 212, 255, 0.55) 0%,
-            rgba(0, 150, 200, 0.30) 35%,
-            transparent 65%
-          );
-          filter: blur(55px);
-        }
+        {/* ── Moon (crescent) ── */}
+        <circle cx="250" cy="140" r="80" fill="rgba(230,220,180,0.07)" />
+        <circle cx="250" cy="140" r="44" fill="#ece7cc" opacity="0.72" />
+        <circle cx="274" cy="128" r="38" fill="#060d1e" opacity="0.97" />
 
-        /* Gold orb — brand secondary */
-        .o-gold {
-          width: 90vw; height: 90vw;
-          background: radial-gradient(circle,
-            rgba(212, 175, 55, 0.60) 0%,
-            rgba(180, 130, 20, 0.35) 35%,
-            transparent 65%
-          );
-          filter: blur(55px);
-        }
+        {/* ── Sea / Mediterranean (right side) ── */}
+        <path
+          d="M 850 0 L 1920 0 L 1920 1080 L 660 1080 Z"
+          fill="url(#seaG)"
+        />
+        {/* Sea shimmer lines */}
+        {[190, 330, 480, 640, 800, 960].map((y, i) => (
+          <line
+            key={i}
+            x1={875 + i * 12} y1={y}
+            x2={1780 - i * 8} y2={y + 18}
+            stroke="rgba(0,180,220,0.07)" strokeWidth="2"
+          />
+        ))}
+        {/* Distant sea horizon glow */}
+        <ellipse cx="1300" cy="60" rx="500" ry="50" fill="rgba(0,180,200,0.04)" />
 
-        /* Small teal accent */
-        .o-teal {
-          width: 50vw; height: 50vw;
-          background: radial-gradient(circle,
-            rgba(0, 180, 200, 0.45) 0%,
-            transparent 60%
-          );
-          filter: blur(40px);
-        }
+        {/* ── Terrain / hills (left side) ── */}
+        <path
+          d="M 0 0 L 850 0 L 660 1080 L 0 1080 Z"
+          fill="url(#terrainG)"
+        />
+        {/* Hill silhouette */}
+        <path
+          d="M 0 0 C 120 90 270 50 420 110 C 560 170 680 90 850 0 L 0 0 Z"
+          fill="#030703"
+          opacity="0.85"
+        />
 
-        /* Aurora — subtle color sweep */
-        .aurora {
-          position: absolute;
-          inset: -30%;
-          background: conic-gradient(
-            from 0deg at 50% 50%,
-            transparent 0deg,
-            rgba(0, 212, 255, 0.12) 80deg,
-            rgba(212, 175, 55, 0.15) 180deg,
-            rgba(0, 180, 200, 0.10) 280deg,
-            transparent 360deg
-          );
-          filter: blur(80px);
-          will-change: transform;
-        }
+        {/* ── Road shadow layer ── */}
+        <path
+          d={ROAD_D}
+          fill="none"
+          stroke="rgba(0,0,0,0.65)"
+          strokeWidth="140"
+          strokeLinecap="round"
+        />
 
-        .grain {
-          position: absolute; inset: 0;
-          opacity: 0.04; mix-blend-mode: overlay;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-        }
+        {/* ── Road surface (asphalt) ── */}
+        <path
+          ref={pathRef}
+          d={ROAD_D}
+          fill="none"
+          stroke="#1b1b26"
+          strokeWidth="100"
+          strokeLinecap="round"
+        />
 
-        @media (max-width: 768px) {
-          .o-cyan, .o-gold { filter: blur(36px); }
-          .o-teal { filter: blur(28px); }
-          .aurora { filter: blur(50px); }
-          .grain { display: none; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .sb-wrap { animation: none !important; }
-          .sb-wrap * { animation: none !important; transition: none !important; }
-        }
-      `}</style>
+        {/* ── Road shoulder / edges ── */}
+        <path
+          d={ROAD_D}
+          fill="none"
+          stroke="rgba(255,255,255,0.20)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          filter="url(#roadEdgeGlow)"
+        />
 
-      <motion.div className="aurora" style={{ rotate: aRot, opacity: 0.9 }} />
+        {/* ── Road center line (yellow dashes) ── */}
+        <path
+          d={ROAD_D}
+          fill="none"
+          stroke="rgba(212,175,55,0.55)"
+          strokeWidth="3"
+          strokeDasharray="44 34"
+          strokeLinecap="round"
+        />
 
-      {/* Two brand-colored orbs moving dramatically */}
-      <motion.div className="orb o-cyan" style={{ x: cX, y: cY, scale: cS, opacity: cO }} />
-      <motion.div className="orb o-gold" style={{ x: gX, y: gY, scale: gS, opacity: gO }} />
-      <motion.div className="orb o-teal" style={{ x: aX, y: aY, scale: aS }} />
+        {/* ── Cypress trees (left / terrain side) ── */}
+        {[
+          [818, 730], [788, 608], [804, 488], [832, 368], [856, 248], [875, 148],
+          [748, 768], [732, 628], [745, 500], [768, 375], [795, 258],
+        ].map(([x, y], i) => (
+          <g key={i} transform={`translate(${x},${y})`}>
+            {/* Trunk */}
+            <rect x="-3" y="0" width="6" height="18" fill="#1a0d04" rx="2" />
+            {/* Tree body — tall narrow (cypress shape) */}
+            <ellipse cx="0" cy="-38" rx="11" ry="44" fill="#0b2a0b" />
+            <ellipse cx="0" cy="-42" rx="7"  ry="32" fill="#0e330e" opacity="0.75" />
+          </g>
+        ))}
 
-      <div className="grain" />
+        {/* ── Coastal town / buildings (right / sea side) ── */}
+        {[
+          { x: 1175, y: 318, w: 46, h: 36 },
+          { x: 1338, y: 270, w: 33, h: 29 },
+          { x: 1475, y: 335, w: 52, h: 40 },
+          { x: 1095, y: 385, w: 40, h: 32 },
+          { x: 1248, y: 208, w: 30, h: 24 },
+          { x: 1570, y: 290, w: 28, h: 22 },
+        ].map(({ x, y, w, h }, i) => (
+          <g key={i}>
+            {/* Building body */}
+            <rect x={x} y={y} width={w} height={h} fill="#061624" opacity="0.92" rx="2" />
+            {/* Roof */}
+            <polygon
+              points={`${x},${y} ${x + w},${y} ${x + w / 2},${y - h * 0.44}`}
+              fill="#081d30" opacity="0.9"
+            />
+            {/* Warm window light */}
+            <rect
+              x={x + w * 0.28} y={y + h * 0.35}
+              width={w * 0.22} height={h * 0.24}
+              fill="rgba(255,185,70,0.32)" rx="1"
+            />
+          </g>
+        ))}
+
+        {/* ── Section stop markers (computed positions on road) ── */}
+        {stops.map(({ x, y, label }, i) => (
+          <g key={i}>
+            {/* Outer pulse ring */}
+            <circle cx={x} cy={y} r={24} fill="none"
+              stroke="rgba(0,212,255,0.20)" strokeWidth="2" />
+            {/* Glow dot */}
+            <circle cx={x} cy={y} r={11}
+              fill="rgba(0,212,255,0.65)"
+              filter="url(#stopGlowF)"
+            />
+            {/* Core */}
+            <circle cx={x} cy={y} r={5} fill="white" opacity="0.92" />
+          </g>
+        ))}
+
+        {/* ── Headlight cone (rendered before car so car draws on top) ── */}
+        <g ref={glowRef} transform="translate(960,1050) rotate(0)">
+          <ellipse
+            cx="0" cy="-75"
+            rx="26" ry="90"
+            fill="rgba(255,240,155,0.16)"
+            filter="url(#softBlur)"
+          />
+        </g>
+
+        {/* ── Car (top-down, brand gold #d4af37) ── */}
+        <g ref={carRef} transform="translate(960,1050) rotate(0)" filter="url(#carShadow)">
+          {/* Body */}
+          <rect x="-18" y="-34" width="36" height="68" rx="10" fill="#d4af37" />
+          {/* Body highlight stripe */}
+          <rect x="-6" y="-28" width="14" height="52" rx="5" fill="rgba(255,255,255,0.08)" />
+          {/* Cabin / glass */}
+          <rect x="-13" y="-23" width="26" height="30" rx="5"
+            fill="rgba(60,165,225,0.28)"
+            stroke="rgba(255,255,255,0.14)" strokeWidth="1"
+          />
+          {/* Front windshield glare */}
+          <rect x="-9" y="-22" width="15" height="5" rx="2" fill="rgba(255,255,255,0.28)" />
+          {/* Rear window */}
+          <rect x="-9" y="9"  width="15" height="4" rx="2" fill="rgba(255,255,255,0.15)" />
+          {/* Wheels — 4 corners */}
+          <rect x="-24" y="-27" width="9" height="16" rx="3" fill="#0f0f0f" />
+          <rect x="15"  y="-27" width="9" height="16" rx="3" fill="#0f0f0f" />
+          <rect x="-24" y="11"  width="9" height="16" rx="3" fill="#0f0f0f" />
+          <rect x="15"  y="11"  width="9" height="16" rx="3" fill="#0f0f0f" />
+          {/* Headlights (front) */}
+          <rect x="-13" y="-36" width="10" height="4" rx="2" fill="rgba(255,235,155,0.96)" />
+          <rect x="3"   y="-36" width="10" height="4" rx="2" fill="rgba(255,235,155,0.96)" />
+          {/* Taillights (rear) */}
+          <rect x="-13" y="32"  width="10" height="4" rx="2" fill="rgba(255,50,50,0.90)" />
+          <rect x="3"   y="32"  width="10" height="4" rx="2" fill="rgba(255,50,50,0.90)" />
+        </g>
+
+        {/* ── Edge vignette (darkens corners) ── */}
+        <rect width="1920" height="1080" fill="url(#vigG)" />
+
+        {/* ── Cyan horizon glow (distant coast) ── */}
+        <ellipse cx="960" cy="55" rx="380" ry="55" fill="rgba(0,212,255,0.04)" />
+      </svg>
     </div>
   );
-};
-
-export default ScrollBackdrop;
+}
