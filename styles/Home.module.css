@@ -1043,7 +1043,7 @@
 /* Testimonials Section */
 .testimonials {
   padding: 60px 20px;
-  background: #f9f9f9;
+  background: transparent;
 }
 
 .testimonialsHeader {
@@ -1067,11 +1067,11 @@
 }
 
 .testimonialCard {
-  background: white;
+  background: rgba(255,255,255,0.04);
   padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #d4af37;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px);
 }
 
 .testimonialHeader {
@@ -1115,7 +1115,7 @@
 /* Benefits Section */
 .benefits {
   padding: 60px 20px;
-  background: white;
+  background: transparent;
 }
 
 .benefitsHeader {
@@ -1369,9 +1369,7 @@
 .fleet {
   position: relative;
   padding: 7rem 1.5rem;
-  background:
-    radial-gradient(ellipse at top, rgba(250,204,21,0.04) 0%, transparent 60%),
-    #0a0a14 !important;
+  background: transparent !important;
 }
 .fleetHeader h2,
 .testimonialsHeader h2,
@@ -1399,9 +1397,7 @@
 
 .testimonials {
   padding: 7rem 1.5rem;
-  background:
-    radial-gradient(ellipse at center, rgba(249,115,22,0.05) 0%, transparent 60%),
-    #050510 !important;
+  background: transparent !important;
 }
 .testimonialCard {
   background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)) !important;
@@ -1422,8 +1418,7 @@
 
 .benefits {
   padding: 7rem 1.5rem;
-  background:
-    linear-gradient(180deg, #0a0a14 0%, #050510 100%);
+  background: transparent !important;
 }
 .benefitCard {
   background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) !important;
@@ -1453,9 +1448,8 @@
 .cta {
   position: relative;
   padding: 8rem 1.5rem;
-  background:
-    radial-gradient(ellipse at center, rgba(249,115,22,0.15) 0%, transparent 60%),
-    linear-gradient(180deg, #050510, #1a0a2e) !important;
+  /* No solid background — let animated backdrop show through */
+  background: radial-gradient(ellipse at center, rgba(249,115,22,0.10) 0%, transparent 65%) !important;
   border-top: 1px solid rgba(255,255,255,0.06);
   text-align: center;
 }
@@ -1487,7 +1481,9 @@
 
 .footer {
   padding: 4rem 1.5rem 3rem;
-  background: #050510 !important;
+  /* Semi-opaque so footer reads as grounded base, not floating */
+  background: rgba(5,5,16,0.80) !important;
+  backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255,255,255,0.06);
   text-align: center;
 }
