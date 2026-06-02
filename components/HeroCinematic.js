@@ -1,9 +1,8 @@
 import React, { Suspense, useEffect, useRef, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
-  Float, ContactShadows, Sparkles, Stars,
-  RoundedBox, Environment, Lightformer, MeshReflectorMaterial,
-  useGLTF,
+  Float, Stars, Environment, Lightformer,
+  RoundedBox, useGLTF,
 } from '@react-three/drei';
 import {
   motion, useScroll, useTransform, useSpring,
@@ -11,37 +10,7 @@ import {
 } from 'framer-motion';
 import * as THREE from 'three';
 
-/**
- * HeroCinematic — realistic procedural sedan + scroll-driven cinematic camera.
- *
- * Replaces both v3 (toy box-car) and HeroPro (photo only). This is the
- * "make it look real without GLTF" recipe from the R3F Cinematic Hero
- * Pattern skill, leveled up with:
- *
- *   - drei <Environment> + <Lightformer> children: procedural HDRI for
- *     true chrome / paint / glass reflections. No CDN fetch — CSP safe.
- *   - drei <MeshReflectorMaterial>: real mirror ground.
- *   - drei <RoundedBox>: bevelled body panels. The single biggest fix
- *     for "looks like a toy" — sharp box edges read as Lego.
- *   - MeshPhysicalMaterial with clearcoat=1, clearcoatRoughness=0.05,
- *     metalness=0.85: actual car paint behaviour.
- *   - MeshPhysicalMaterial transmission=0.9 for windshield: real glass.
- *   - Sedan silhouette: separate hood, cabin, trunk meshes with angles;
- *     fender bulges over wheels; chrome trim; spoke rims with brake
- *     callipers; LED tail-light bar; spotlight headlight cones.
- *   - Scroll-driven cinematic camera: camera dollies in + orbits as the
- *     user scrolls, with the car rotating slightly counter to the camera
- *     so you always see a fresh angle.
- *
- * Carried over from v3 / HeroPro:
- *   - .canvas-layer pointer-events:none (mobile scroll fix)
- *   - prefers-reduced-motion + deviceMemory<4 → static fallback
- *   - WebGL context-lost listener → graceful degrade
- *   - Framer Motion: stagger entrance, character title flip, magnetic
- *     CTA, lang crossfade, scroll-linked content parallax
- */
-
-/* ─────────────────── Realistic sedan ─────────────────── */
+/* ─────────────────── Materials ─────────────────── */
 
 const PAINT = {
   color: '#0f0f1a',
@@ -71,25 +40,19 @@ const GLASS = {
   opacity: 0.85,
 };
 
+/* ─────────────────── Fallback sculpt car ─────────────────── */
+
 function Wheel({ position }) {
   return (
     <group position={position}>
-      {/* Tire */}
-      <mesh castShadow rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.34, 0.34, 0.22, 32]} />
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.34, 0.34, 0.22, 20]} />
         <meshStandardMaterial color="#0a0a0a" roughness={0.85} />
       </mesh>
-      {/* Sidewall outer rim ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.001]}>
-        <torusGeometry args={[0.32, 0.022, 12, 36]} />
-        <meshStandardMaterial color="#1a1a1a" roughness={0.7} />
-      </mesh>
-      {/* Chrome rim */}
-      <mesh castShadow rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.115]}>
-        <cylinderGeometry args={[0.21, 0.21, 0.02, 24]} />
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.115]}>
+        <cylinderGeometry args={[0.21, 0.21, 0.02, 16]} />
         <meshPhysicalMaterial {...CHROME} />
       </mesh>
-      {/* Spokes */}
       {Array.from({ length: 5 }).map((_, i) => {
         const a = (i / 5) * Math.PI * 2;
         return (
@@ -99,15 +62,9 @@ function Wheel({ position }) {
           </mesh>
         );
       })}
-      {/* Hub centre */}
       <mesh position={[0, 0, 0.125]}>
-        <cylinderGeometry args={[0.05, 0.05, 0.02, 16]} rotation={[Math.PI / 2, 0, 0]} />
+        <cylinderGeometry args={[0.05, 0.05, 0.02, 12]} rotation={[Math.PI / 2, 0, 0]} />
         <meshPhysicalMaterial color="#f97316" emissive="#f97316" emissiveIntensity={0.6} metalness={0.5} roughness={0.3} />
-      </mesh>
-      {/* Brake calliper (small orange box behind rim) */}
-      <mesh position={[0.12, -0.05, 0.08]}>
-        <boxGeometry args={[0.08, 0.12, 0.06]} />
-        <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={0.4} />
       </mesh>
     </group>
   );
@@ -115,8 +72,8 @@ function Wheel({ position }) {
 
 function Fender({ position }) {
   return (
-    <mesh castShadow position={position}>
-      <sphereGeometry args={[0.42, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+    <mesh position={position}>
+      <sphereGeometry args={[0.42, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
       <meshPhysicalMaterial {...PAINT} />
     </mesh>
   );
@@ -125,211 +82,118 @@ function Fender({ position }) {
 function SculptCar() {
   return (
     <group rotation={[0, Math.PI / 4, 0]} position={[0, -0.5, 0]}>
-
-      {/* Lower body sill — long flat box */}
-      <RoundedBox args={[3.3, 0.18, 1.35]} radius={0.05} smoothness={4} castShadow position={[0, 0.28, 0]}>
+      <RoundedBox args={[3.3, 0.18, 1.35]} radius={0.05} smoothness={3} position={[0, 0.28, 0]}>
         <meshPhysicalMaterial {...PAINT} />
       </RoundedBox>
-
-      {/* Main body — bevelled, wider than sill, slight taper top */}
-      <RoundedBox args={[3.0, 0.55, 1.5]} radius={0.18} smoothness={6} castShadow position={[0, 0.65, 0]}>
+      <RoundedBox args={[3.0, 0.55, 1.5]} radius={0.18} smoothness={4} position={[0, 0.65, 0]}>
         <meshPhysicalMaterial {...PAINT} />
       </RoundedBox>
-
-      {/* Hood — angled down toward front */}
-      <RoundedBox args={[1.0, 0.18, 1.4]} radius={0.08} smoothness={4} castShadow
+      <RoundedBox args={[1.0, 0.18, 1.4]} radius={0.08} smoothness={3}
         position={[1.15, 0.88, 0]} rotation={[0, 0, -0.08]}>
         <meshPhysicalMaterial {...PAINT} />
       </RoundedBox>
-
-      {/* Trunk — angled down toward back */}
-      <RoundedBox args={[0.85, 0.16, 1.4]} radius={0.08} smoothness={4} castShadow
+      <RoundedBox args={[0.85, 0.16, 1.4]} radius={0.08} smoothness={3}
         position={[-1.2, 0.88, 0]} rotation={[0, 0, 0.06]}>
         <meshPhysicalMaterial {...PAINT} />
       </RoundedBox>
-
-      {/* Cabin — sloped roof box (smaller, sits on body) */}
-      <RoundedBox args={[1.7, 0.5, 1.32]} radius={0.18} smoothness={6} castShadow position={[-0.05, 1.18, 0]}>
+      <RoundedBox args={[1.7, 0.5, 1.32]} radius={0.18} smoothness={4} position={[-0.05, 1.18, 0]}>
         <meshPhysicalMaterial {...PAINT} />
       </RoundedBox>
-
-      {/* Windshield (front, sloped) */}
-      <mesh castShadow position={[0.75, 1.18, 0]} rotation={[0, 0, -0.55]}>
+      <mesh position={[0.75, 1.18, 0]} rotation={[0, 0, -0.55]}>
         <boxGeometry args={[0.85, 0.5, 1.22]} />
         <meshPhysicalMaterial {...GLASS} />
       </mesh>
-
-      {/* Rear window (sloped) */}
-      <mesh castShadow position={[-0.78, 1.18, 0]} rotation={[0, 0, 0.55]}>
+      <mesh position={[-0.78, 1.18, 0]} rotation={[0, 0, 0.55]}>
         <boxGeometry args={[0.8, 0.5, 1.22]} />
         <meshPhysicalMaterial {...GLASS} />
       </mesh>
-
-      {/* Side windows (left + right) */}
       {[0.66, -0.66].map((z, i) => (
-        <mesh key={`sidewin-${i}`} castShadow position={[-0.05, 1.22, z]}>
+        <mesh key={`sw-${i}`} position={[-0.05, 1.22, z]}>
           <boxGeometry args={[1.55, 0.36, 0.04]} />
           <meshPhysicalMaterial {...GLASS} />
         </mesh>
       ))}
-
-      {/* Chrome window trim (top + side rails) */}
-      {[0.69, -0.69].map((z, i) => (
-        <mesh key={`trim-side-${i}`} position={[-0.05, 1.4, z]}>
-          <boxGeometry args={[1.6, 0.04, 0.04]} />
-          <meshPhysicalMaterial {...CHROME} />
-        </mesh>
-      ))}
-
-      {/* Side body crease (subtle horizontal line) */}
-      {[0.755, -0.755].map((z, i) => (
-        <mesh key={`crease-${i}`} position={[0, 0.55, z]}>
-          <boxGeometry args={[2.6, 0.03, 0.005]} />
-          <meshPhysicalMaterial color="#000" metalness={0.5} roughness={0.4} />
-        </mesh>
-      ))}
-
-      {/* Fenders over wheels */}
       <Fender position={[1.05, 0.45, 0.7]} />
       <Fender position={[1.05, 0.45, -0.7]} />
       <Fender position={[-1.05, 0.45, 0.7]} />
       <Fender position={[-1.05, 0.45, -0.7]} />
-
-      {/* Front grille */}
-      <mesh position={[1.62, 0.6, 0]} castShadow>
+      <mesh position={[1.62, 0.6, 0]}>
         <boxGeometry args={[0.06, 0.28, 0.95]} />
         <meshStandardMaterial color="#0a0a0a" metalness={0.6} roughness={0.4} />
       </mesh>
-      {/* Grille horizontal bars */}
-      {[-0.06, 0.06].map((y, i) => (
-        <mesh key={`gb-${i}`} position={[1.64, 0.6 + y, 0]}>
-          <boxGeometry args={[0.04, 0.03, 0.95]} />
-          <meshPhysicalMaterial {...CHROME} />
-        </mesh>
-      ))}
-
-      {/* Front bumper */}
-      <RoundedBox args={[0.25, 0.22, 1.55]} radius={0.06} smoothness={4} castShadow position={[1.62, 0.38, 0]}>
+      <RoundedBox args={[0.25, 0.22, 1.55]} radius={0.06} smoothness={3} position={[1.62, 0.38, 0]}>
         <meshPhysicalMaterial {...PAINT} />
       </RoundedBox>
-
-      {/* Rear bumper */}
-      <RoundedBox args={[0.25, 0.22, 1.55]} radius={0.06} smoothness={4} castShadow position={[-1.68, 0.38, 0]}>
+      <RoundedBox args={[0.25, 0.22, 1.55]} radius={0.06} smoothness={3} position={[-1.68, 0.38, 0]}>
         <meshPhysicalMaterial {...PAINT} />
       </RoundedBox>
-
-      {/* Headlights — LED bar + glow */}
       {[0.42, -0.42].map((z, i) => (
         <group key={`hl-${i}`} position={[1.65, 0.62, z]}>
           <mesh>
             <boxGeometry args={[0.04, 0.14, 0.32]} />
             <meshStandardMaterial color="#fef9c3" emissive="#fef9c3" emissiveIntensity={4} toneMapped={false} />
           </mesh>
-          <pointLight color="#fef9c3" intensity={1.5} distance={4} />
+          <pointLight color="#fef9c3" intensity={1.0} distance={3} />
         </group>
       ))}
-      {/* Headlight directional cones (subtle volumetric) */}
-      {[0.42, -0.42].map((z, i) => (
-        <mesh key={`hl-cone-${i}`} position={[2.4, 0.55, z]} rotation={[0, 0, -Math.PI / 2]}>
-          <coneGeometry args={[0.3, 1.5, 16, 1, true]} />
-          <meshBasicMaterial color="#fef9c3" transparent opacity={0.08} side={THREE.DoubleSide}
-            blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
-        </mesh>
-      ))}
-
-      {/* Tail light bar (LED strip across rear) */}
       <mesh position={[-1.72, 0.62, 0]}>
         <boxGeometry args={[0.03, 0.07, 1.15]} />
-        <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={3.5} toneMapped={false} />
+        <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={3.0} toneMapped={false} />
       </mesh>
-
-      {/* Side mirrors */}
-      {[0.78, -0.78].map((z, i) => (
-        <mesh key={`mirror-${i}`} castShadow position={[0.78, 1.05, z]}>
-          <sphereGeometry args={[0.08, 12, 8]} />
-          <meshPhysicalMaterial {...PAINT} />
-        </mesh>
-      ))}
-
-      {/* Door handles (chrome bars) */}
-      {[0.756, -0.756].map((z, i) => (
-        <mesh key={`handle-${i}`} position={[0.1, 0.78, z]}>
-          <boxGeometry args={[0.3, 0.04, 0.03]} />
-          <meshPhysicalMaterial {...CHROME} />
-        </mesh>
-      ))}
-
-      {/* Wheels */}
       <Wheel position={[1.05, 0.34, 0.78]} />
       <Wheel position={[1.05, 0.34, -0.78]} />
       <Wheel position={[-1.05, 0.34, 0.78]} />
       <Wheel position={[-1.05, 0.34, -0.78]} />
-
-      {/* Neon underglow (subtle, purple) */}
+      {/* Neon underglow */}
       <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[3.2, 1.6]} />
-        <meshBasicMaterial color="#a78bfa" transparent opacity={0.35}
+        <meshBasicMaterial color="#a78bfa" transparent opacity={0.3}
           blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
       </mesh>
     </group>
   );
 }
 
-/* ─────────────────── Real GLB Ferrari (replaces SculptCar) ─────────────────── */
+/* ─────────────────── Ferrari GLB ─────────────────── */
 
-// three.js sample model — MIT licensed, served from /public/models/ferrari.glb
-// Wheel/body part names from the official three.js webgl_loader_gltf demo.
 function Ferrari() {
   const { scene } = useGLTF('/models/ferrari.glb', '/draco/');
   const wheelsRef = useRef([]);
 
   useEffect(() => {
     if (!scene) return;
-    // Body car-paint material override → cinematic deep paint w/ clearcoat
     const bodyMat = new THREE.MeshPhysicalMaterial({
-      color: '#0b0d18',
-      metalness: 1.0,
-      roughness: 0.35,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.04,
-      envMapIntensity: 1.5,
+      color: '#0b0d18', metalness: 1.0, roughness: 0.35,
+      clearcoat: 1.0, clearcoatRoughness: 0.04, envMapIntensity: 1.5,
     });
-    // Detail trim — chromey
     const detailsMat = new THREE.MeshStandardMaterial({
       color: '#cdcdd5', metalness: 1.0, roughness: 0.45, envMapIntensity: 1.4,
     });
-    // Glass
     const glassMat = new THREE.MeshPhysicalMaterial({
-      color: '#1a1f2e',
-      metalness: 0.1, roughness: 0.04,
+      color: '#1a1f2e', metalness: 0.1, roughness: 0.04,
       transmission: 0.9, thickness: 0.5, ior: 1.45,
       transparent: true, opacity: 0.85, envMapIntensity: 1.2,
     });
-
     scene.traverse((obj) => {
       if (!obj.isMesh) return;
-      obj.castShadow = true;
-      obj.receiveShadow = true;
       const n = (obj.name || '').toLowerCase();
       if (n === 'body' || n.includes('body')) obj.material = bodyMat;
       else if (n === 'glass' || n.includes('glass')) obj.material = glassMat;
       else if (n.includes('rim') || n.includes('trim')) obj.material = detailsMat;
     });
-
     wheelsRef.current = ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr']
       .map((nm) => scene.getObjectByName(nm))
       .filter(Boolean);
   }, [scene]);
 
-  // Slow wheel spin so it doesn't feel like a static photo
   useFrame((_, delta) => {
-    wheelsRef.current.forEach((w) => { if (w) w.rotation.x += delta * 0.6; });
+    wheelsRef.current.forEach((w) => { if (w) w.rotation.x += delta * 0.5; });
   });
 
   return (
     <primitive
       object={scene}
-      scale={[2.4, 2.4, 2.4]}
+      scale={[1.5, 1.5, 1.5]}
       position={[0, -0.5, 0]}
       rotation={[0, Math.PI / 4, 0]}
     />
@@ -338,25 +202,13 @@ function Ferrari() {
 
 useGLTF.preload('/models/ferrari.glb', '/draco/');
 
-/* ─────────────────── Mirror floor ─────────────────── */
+/* ─────────────────── Simple floor (replaces MeshReflectorMaterial — perf) ─────────────────── */
 
-function MirrorFloor() {
+function SimpleFloor() {
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-      <planeGeometry args={[50, 50]} />
-      <MeshReflectorMaterial
-        blur={[300, 100]}
-        resolution={1024}
-        mixBlur={1}
-        mixStrength={50}
-        roughness={0.9}
-        depthScale={1.2}
-        minDepthThreshold={0.4}
-        maxDepthThreshold={1.4}
-        color="#0a0a18"
-        metalness={0.6}
-        mirror={0.55}
-      />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+      <planeGeometry args={[60, 60]} />
+      <meshStandardMaterial color="#06060e" metalness={0.3} roughness={0.9} />
     </mesh>
   );
 }
@@ -374,9 +226,7 @@ function CinematicRig({ children }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     desktopRef.current = window.matchMedia('(pointer: fine)').matches;
-    const onScroll = () => {
-      scrollRef.current = Math.min(window.scrollY / 800, 1);
-    };
+    const onScroll = () => { scrollRef.current = Math.min(window.scrollY / 800, 1); };
     const onPointer = (e) => {
       if (!desktopRef.current) return;
       pointerRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -393,30 +243,28 @@ function CinematicRig({ children }) {
 
   useFrame((_, delta) => {
     timeRef.current += delta;
-    const s = scrollRef.current; // 0..1 across first 800px
+    const s = scrollRef.current;
 
-    // Cinematic camera path — orbits as user scrolls
-    // Idle (s=0): wide 3/4 view. Mid-scroll (s=0.5): close side angle. Bottom (s=1): low rear.
-    const baseAngle = -Math.PI * 0.18 + timeRef.current * 0.06; // slow idle orbit
+    // ZOOMED OUT: radius starts at 8.0 (was 5.8)
+    const baseAngle = -Math.PI * 0.18 + timeRef.current * 0.05;
     const scrollAngle = s * Math.PI * 0.55;
     const angle = baseAngle + scrollAngle;
-    const radius = 5.8 - s * 1.8;        // dolly in
-    const height = 1.6 - s * 0.4;        // sink slightly
-    const px = pointerRef.current.x * 0.4;
-    const py = pointerRef.current.y * -0.25;
+    const radius = 8.0 - s * 2.2;   // wider orbit, dollies in on scroll
+    const height = 1.8 - s * 0.4;
+    const px = pointerRef.current.x * 0.35;
+    const py = pointerRef.current.y * -0.2;
 
     const tx = Math.cos(angle) * radius + px;
     const tz = Math.sin(angle) * radius;
     const ty = height + py;
 
-    camera.position.x += (tx - camera.position.x) * 0.06;
-    camera.position.y += (ty - camera.position.y) * 0.06;
-    camera.position.z += (tz - camera.position.z) * 0.06;
-    camera.lookAt(0, 0.6 - s * 0.3, 0);
+    camera.position.x += (tx - camera.position.x) * 0.055;
+    camera.position.y += (ty - camera.position.y) * 0.055;
+    camera.position.z += (tz - camera.position.z) * 0.055;
+    camera.lookAt(0, 0.5 - s * 0.3, 0);
 
-    // Car counter-rotates slightly so you always see fresh detail
     if (groupRef.current) {
-      groupRef.current.rotation.y = s * -0.35 + Math.sin(timeRef.current * 0.4) * 0.04;
+      groupRef.current.rotation.y = s * -0.35 + Math.sin(timeRef.current * 0.35) * 0.04;
     }
   });
 
@@ -427,11 +275,13 @@ function CinematicRig({ children }) {
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.13, delayChildren: 0.25 } },
+  show: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.2 } },
 };
+
+// PERF: removed filter:blur — CSS filter animation is heavy on GPU compositing
 const itemVariants = {
-  hidden: { opacity: 0, y: 28, filter: 'blur(8px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.85, ease: [0.2, 0.8, 0.2, 1] } },
+  hidden: { opacity: 0, y: 22 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.2, 0.8, 0.2, 1] } },
 };
 
 function AnimatedTitle({ text }) {
@@ -442,7 +292,7 @@ function AnimatedTitle({ text }) {
       aria-label={text}
       initial="hidden"
       animate="show"
-      variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04, delayChildren: 0.35 } } }}
+      variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04, delayChildren: 0.3 } } }}
     >
       {chars.map((c, i) => (
         <motion.span
@@ -450,11 +300,11 @@ function AnimatedTitle({ text }) {
           aria-hidden="true"
           style={{ display: 'inline-block', whiteSpace: 'pre' }}
           variants={{
-            hidden: { opacity: 0, y: 50, rotateX: -80 },
-            show: { opacity: 1, y: 0, rotateX: 0, transition: { duration: 0.7, ease: [0.2, 0.8, 0.2, 1] } },
+            hidden: { opacity: 0, y: 40 },
+            show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.2, 0.8, 0.2, 1] } },
           }}
         >
-          {c === ' ' ? ' ' : c}
+          {c === ' ' ? ' ' : c}
         </motion.span>
       ))}
     </motion.h1>
@@ -496,7 +346,6 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
   const [supports3D, setSupports3D] = useState(true);
   const wrapRef = useRef(null);
 
-  // Scroll-linked parallax on content overlay
   const { scrollY } = useScroll();
   const yContent = useTransform(scrollY, [0, 600], [0, -140]);
   const opacityContent = useTransform(scrollY, [0, 520], [1, 0]);
@@ -507,7 +356,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
     const lowMem = navigator.deviceMemory && navigator.deviceMemory < 4;
     if (reduced || lowMem) setSupports3D(false);
     const handler = (e) => {
-      console.warn('[HeroCinematic] WebGL context lost — disabling 3D');
+      console.warn('[HeroCinematic] WebGL context lost');
       setSupports3D(false);
       e.preventDefault?.();
     };
@@ -544,8 +393,43 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
           overflow: hidden;
           isolation: isolate;
           touch-action: pan-y;
-          background: transparent; /* ScrollBackdrop shows through */
+          background: #050510;
         }
+
+        /* ── Animated CSS background — always visible, GPU-only transforms ── */
+        .hc-bg {
+          position: absolute; inset: 0; z-index: 0;
+          background: #050510;
+          overflow: hidden;
+        }
+        .hc-bg::before {
+          content: '';
+          position: absolute; inset: 0;
+          background:
+            radial-gradient(ellipse 90% 65% at 40% -5%,  rgba(124,58,237,0.35), transparent 65%),
+            radial-gradient(ellipse 75% 55% at 88% 65%, rgba(249,115,22,0.25), transparent 65%),
+            radial-gradient(ellipse 60% 50% at 15% 80%, rgba(167,139,250,0.18), transparent 65%);
+          animation: hcAurora1 11s ease-in-out infinite alternate;
+          will-change: transform, opacity;
+        }
+        .hc-bg::after {
+          content: '';
+          position: absolute; inset: 0;
+          background:
+            radial-gradient(ellipse 70% 50% at 75% 10%, rgba(249,115,22,0.20), transparent 65%),
+            radial-gradient(ellipse 55% 45% at 25% 55%, rgba(250,204,21,0.12), transparent 65%);
+          animation: hcAurora2 16s ease-in-out infinite alternate-reverse;
+          will-change: transform, opacity;
+        }
+        @keyframes hcAurora1 {
+          0%   { opacity: 0.65; transform: scale(1) translateX(0) translateY(0); }
+          100% { opacity: 1;    transform: scale(1.06) translateX(2%) translateY(-1%); }
+        }
+        @keyframes hcAurora2 {
+          0%   { opacity: 0.5; transform: scale(1) translateX(0); }
+          100% { opacity: 0.9; transform: scale(1.08) translateX(-3%) translateY(2%); }
+        }
+
         .hc-canvas {
           position: absolute; inset: 0;
           pointer-events: none;
@@ -553,39 +437,33 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
           z-index: 1;
         }
         .hc-vignette {
-          position: absolute; inset: 0; pointer-events: none;
-          z-index: 2;
+          position: absolute; inset: 0; pointer-events: none; z-index: 2;
           background:
-            radial-gradient(ellipse at 50% 100%, rgba(249,115,22,0.20), transparent 50%),
-            radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(5,5,16,0.65) 100%);
+            radial-gradient(ellipse at 50% 100%, rgba(249,115,22,0.18), transparent 50%),
+            radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(5,5,16,0.60) 100%);
         }
         .hc-grain {
-          position: absolute; inset: 0; pointer-events: none;
-          z-index: 3;
-          opacity: 0.06; mix-blend-mode: overlay;
+          position: absolute; inset: 0; pointer-events: none; z-index: 3;
+          opacity: 0.055; mix-blend-mode: overlay;
           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
         }
         .hc-fallback {
           position: absolute; inset: 0;
           display: flex; align-items: center; justify-content: center;
-          font-size: 12rem; opacity: 0.4; color: #facc15; pointer-events: none;
-          filter: drop-shadow(0 0 60px rgba(249,115,22,0.5));
-          z-index: 1;
+          font-size: 10rem; opacity: 0.4; color: #facc15; pointer-events: none;
+          filter: drop-shadow(0 0 50px rgba(249,115,22,0.4)); z-index: 1;
         }
         .hc-content {
           position: absolute; inset: 0;
           display: flex; flex-direction: column;
           align-items: center; justify-content: flex-start;
           padding: clamp(2rem, 8vh, 5rem) 2rem 0;
-          text-align: center;
-          z-index: 5;
-          pointer-events: none;
+          text-align: center; z-index: 5; pointer-events: none;
         }
         .hc-eyebrow {
           font-size: clamp(0.7rem, 1.4vw, 0.85rem);
           letter-spacing: 0.4em; text-transform: uppercase;
-          color: #fde68a; font-weight: 500;
-          margin-bottom: 1.4rem;
+          color: #fde68a; font-weight: 500; margin-bottom: 1.4rem;
           text-shadow: 0 2px 14px rgba(0,0,0,0.7);
         }
         .hc-title {
@@ -600,9 +478,8 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         }
         .hc-sub {
           font-size: clamp(1rem, 2vw, 1.3rem);
-          color: rgba(255,255,255,0.82);
-          max-width: 620px; margin: 0 0 2.2rem;
-          line-height: 1.5;
+          color: rgba(255,255,255,0.82); max-width: 620px;
+          margin: 0 0 2.2rem; line-height: 1.5;
           text-shadow: 0 2px 12px rgba(0,0,0,0.7);
         }
         .hc-chips { display: flex; gap: 0.7rem; flex-wrap: wrap; justify-content: center; margin-bottom: 2.2rem; pointer-events: auto; }
@@ -611,8 +488,6 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
           padding: 0.55rem 1rem; border-radius: 999px;
           background: rgba(255,255,255,0.05);
           border: 1px solid rgba(255,255,255,0.12);
-          backdrop-filter: blur(14px) saturate(140%);
-          -webkit-backdrop-filter: blur(14px) saturate(140%);
           color: #fff; font-size: 0.875rem; font-weight: 500;
         }
         .hc-chip span:first-child { color: #facc15; }
@@ -622,12 +497,12 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
           background: linear-gradient(135deg, #facc15 0%, #f97316 100%);
           color: #0a0a14; font-weight: 700; font-size: 1.05rem;
           border-radius: 999px; letter-spacing: 0.02em;
-          box-shadow: 0 12px 40px rgba(249, 115, 22, 0.5), 0 0 0 1px rgba(255,255,255,0.10) inset;
+          box-shadow: 0 12px 40px rgba(249,115,22,0.5), 0 0 0 1px rgba(255,255,255,0.10) inset;
           position: relative; overflow: hidden;
         }
         .hc-cta-primary::after {
           content: ''; position: absolute; inset: 0;
-          background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
+          background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
           transform: translateX(-100%); transition: transform 0.9s;
         }
         .hc-cta-primary:hover::after { transform: translateX(100%); }
@@ -635,7 +510,6 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
           padding: 1.05rem 2rem; cursor: pointer;
           background: rgba(255,255,255,0.04);
           border: 1px solid rgba(255,255,255,0.18);
-          backdrop-filter: blur(14px);
           color: #fff; font-weight: 500; font-size: 1rem;
           border-radius: 999px; text-decoration: none;
           display: inline-flex; align-items: center; gap: 0.5rem;
@@ -654,7 +528,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         }
         @keyframes hcScroll {
           0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
-          50%      { opacity: 1;   transform: scaleY(1); }
+          50%       { opacity: 1;   transform: scaleY(1); }
         }
         @media (max-width: 768px) {
           .hc-wrap { height: 95vh; min-height: 600px; }
@@ -668,13 +542,21 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         }
       `}</style>
 
+      {/* Layer 0 — CSS animated aurora background (always visible) */}
+      <div className="hc-bg" />
+
+      {/* Layer 1 — WebGL 3D canvas */}
       {supports3D ? (
         <div className="hc-canvas">
           <Canvas
-            shadows
-            camera={{ position: [5.5, 1.6, 5.5], fov: 36 }}
-            gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: false }}
-            dpr={[1, 1.5]}
+            camera={{ position: [8.0, 2.0, 8.0], fov: 52 }}
+            gl={{
+              antialias: true,
+              alpha: true,
+              powerPreference: 'high-performance',
+              preserveDrawingBuffer: false,
+            }}
+            dpr={1}
             onCreated={({ gl }) => {
               gl.domElement.addEventListener('webglcontextlost', (e) => {
                 e.preventDefault(); setSupports3D(false);
@@ -684,47 +566,37 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             }}
           >
             <Suspense fallback={null}>
-              <fog attach="fog" args={['#06060c', 9, 28]} />
+              <fog attach="fog" args={['#06060c', 12, 32]} />
 
-              {/* Hand-rig scene lights */}
-              <ambientLight intensity={0.35} color="#fef3c7" />
-              <hemisphereLight args={['#fde68a', '#1a0a2e', 0.4]} />
-              <directionalLight position={[5, 6, 3]} intensity={1.8} color="#fde68a"
-                castShadow shadow-mapSize={[2048, 2048]} />
-              <directionalLight position={[-4, 3, -2]} intensity={0.8} color="#f97316" />
-              <pointLight position={[-3, 4, -5]} intensity={1.2} color="#a78bfa" distance={20} />
+              {/* Lights — no shadow maps for perf */}
+              <ambientLight intensity={0.4} color="#fef3c7" />
+              <hemisphereLight args={['#fde68a', '#1a0a2e', 0.45]} />
+              <directionalLight position={[5, 6, 3]} intensity={1.6} color="#fde68a" />
+              <directionalLight position={[-4, 3, -2]} intensity={0.7} color="#f97316" />
+              <pointLight position={[-3, 4, -5]} intensity={1.0} color="#a78bfa" distance={20} />
 
-              {/* PROCEDURAL HDRI via Lightformer panels — gives chrome / paint
-                  real reflections without fetching an HDRI file. CSP-safe. */}
+              {/* Procedural HDRI — frames=1 so renders once, CSP-safe */}
               <Environment resolution={256} frames={1}>
-                {/* Big warm overhead */}
-                <Lightformer form="rect" intensity={2.5} color="#fde68a"
+                <Lightformer form="rect" intensity={2.2} color="#fde68a"
                   position={[0, 6, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[10, 6, 1]} />
-                {/* Cool side rim */}
-                <Lightformer form="rect" intensity={1.6} color="#a78bfa"
+                <Lightformer form="rect" intensity={1.4} color="#a78bfa"
                   position={[-5, 2, -3]} rotation={[0, Math.PI / 2, 0]} scale={[6, 4, 1]} />
-                {/* Warm side rim */}
-                <Lightformer form="rect" intensity={1.8} color="#f97316"
+                <Lightformer form="rect" intensity={1.6} color="#f97316"
                   position={[5, 2, 3]} rotation={[0, -Math.PI / 2, 0]} scale={[6, 4, 1]} />
-                {/* Front kick */}
-                <Lightformer form="rect" intensity={1.4} color="#facc15"
+                <Lightformer form="rect" intensity={1.2} color="#facc15"
                   position={[0, 3, 7]} rotation={[0, 0, 0]} scale={[8, 3, 1]} />
-                {/* Floor bounce */}
-                <Lightformer form="rect" intensity={0.6} color="#0a0a14"
-                  position={[0, -3, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[20, 20, 1]} />
               </Environment>
 
-              <Stars radius={60} depth={40} count={1500} factor={2.5} fade speed={0.5} />
-              <Sparkles count={60} scale={[10, 6, 10]} size={2} speed={0.25} color="#fde68a" />
+              {/* Stars only — Sparkles removed for perf */}
+              <Stars radius={60} depth={40} count={500} factor={2.2} fade speed={0.4} />
 
               <CinematicRig>
-                <Float speed={1.0} rotationIntensity={0.08} floatIntensity={0.18}>
+                <Float speed={0.7} rotationIntensity={0.05} floatIntensity={0.12}>
                   <Suspense fallback={<SculptCar />}>
                     <Ferrari />
                   </Suspense>
                 </Float>
-                <MirrorFloor />
-                <ContactShadows position={[0, -0.49, 0]} opacity={0.7} scale={12} blur={2.5} far={4.5} />
+                <SimpleFloor />
               </CinematicRig>
             </Suspense>
           </Canvas>
@@ -733,9 +605,12 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         <div className="hc-fallback" aria-hidden="true">🚗</div>
       )}
 
+      {/* Layer 2 — vignette overlay */}
       <div className="hc-vignette" />
+      {/* Layer 3 — film grain */}
       <div className="hc-grain" />
 
+      {/* Layer 5 — UI content */}
       <motion.div
         className="hc-content"
         style={{ y: yContent, opacity: opacityContent }}
@@ -756,7 +631,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             <motion.div className="hc-chips" variants={itemVariants}>
               {[t.chip1, t.chip2, t.chip3].map((c, i) => (
                 <motion.span key={i} className="hc-chip"
-                  whileHover={{ y: -3, backgroundColor: 'rgba(250, 204, 21, 0.12)', borderColor: 'rgba(250, 204, 21, 0.35)' }}
+                  whileHover={{ y: -3, backgroundColor: 'rgba(250,204,21,0.12)', borderColor: 'rgba(250,204,21,0.35)' }}
                   transition={{ duration: 0.2 }}>
                   <span>✦</span><span>{c}</span>
                 </motion.span>
@@ -778,7 +653,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
 
       <motion.div className="hc-scroll-cue"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.7 }}>
+        transition={{ duration: 1, delay: 1.6 }}>
         Scroll
         <div className="hc-scroll-line" />
       </motion.div>

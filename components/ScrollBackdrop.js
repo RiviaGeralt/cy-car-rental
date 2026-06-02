@@ -87,7 +87,7 @@ const ScrollBackdrop = () => {
       <motion.div className="sb-layer aurora" style={{ rotate: rotAur }} />
 
       {/* Far layer */}
-      <motion.div className="sb-layer" style={{ y: yFar, filter: `hue-rotate(${hueShift.get()}deg)` }}>
+      <motion.div className="sb-layer" style={{ y: yFar }}>
         <div className="orb far-1" />
         <div className="orb far-2" />
         <div className="orb far-3" />
