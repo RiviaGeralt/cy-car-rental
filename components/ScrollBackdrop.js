@@ -1,109 +1,46 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from 'framer-motion';
 
 /**
- * ScrollBackdrop v8 — Side-view multi-layer parallax road trip
+ * ScrollBackdrop v9 — Simplified side-view road trip
  *
- * Concept: Gold sedan in profile stays anchored ~33% from left.
- * Six depth layers parallax behind/in-front at different speeds.
- * Wheels rotate with scroll. Four roadside "section stops" slide past
- * (FLEET, REVIEWS, WHY US, CONTACT) — like driving by exits on a highway.
+ * v8 was too heavy (60 dashes + 25 rails + 6 transform groups → lag) and
+ * fought z-index with the hero. v9 simplifies to ~20 SVG nodes, single
+ * z-index:0 layer, DOM-order stacking (rendered BEFORE hero in pages/index.js
+ * so hero paints over it naturally).
  *
- * SOURCES / INSPIRATION:
- *  1. motion.dev (framer-motion docs) — `useScroll` + `useTransform` + `useSpring`
- *     parallax recipe: https://motion.dev/docs/react-use-scroll
- *  2. 21st.dev — "Backgrounds" + "Scroll Areas" categories: side-scrolling
- *     parallax pattern (camera dolly through a layered world)
- *  3. Vault skill [[05 Skills/02-Design-Styles/04-Scroll-Reactive-Parallax-Backdrop.md]] v2
- *     — scrollYProgress (0→1), GPU-only transforms, spring { 55, 22, 0.5 } baseline,
- *     mobile blur reduction, prefers-reduced-motion compliance.
- *  4. Vault skill [[05 Skills/02-Design-Styles/05-Master-Design-Skills-Registry.md]]
- *     Phase 4 (motion): purposeful animation, spring physics, no jank.
- *  5. Vault skill [[05 Skills/02-Design-Styles/01-R3F-Cinematic-Hero-Pattern.md]]
- *     — cinematic camera language (low horizon, sub-pixel bob).
- *
- * Brand palette (matches HeroCinematic + globals.css):
- *   deep:   #050510
- *   dusk:   #0a1428 → #1a3a5c
- *   gold:   #d4af37 (sedan, signs, lane dashes)
- *   cyan:   rgba(0,212,255,…) (horizon glow, window tint)
+ * Sources (unchanged from v8):
+ *  - motion.dev: useScroll + useTransform + useSpring parallax recipe
+ *  - 21st.dev: side-scrolling backgrounds category
+ *  - Vault [[04-Scroll-Reactive-Parallax-Backdrop]] v2: scrollYProgress, GPU-only
+ *  - Vault [[05-Master-Design-Skills-Registry]] Phase 4: no jank, purposeful motion
+ *  - Vault [[01-R3F-Cinematic-Hero-Pattern]]: low-horizon cinematic framing
  */
 
 const ScrollBackdrop = () => {
   const wheelFront = useRef(null);
   const wheelBack  = useRef(null);
 
-  // Mobile detection: bail out of the heavy SVG entirely on phones.
-  // Reason: overflow-x:hidden on html/body clips fixed children on iOS Safari,
-  // and 100+ animated SVG nodes lag mobile GPUs. CSS-only fallback below.
-  const [isMobile, setIsMobile] = useState(null); // null = detecting, prevents desktop flash
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    setIsMobile(window.matchMedia('(pointer: coarse)').matches);
-  }, []);
-
-  // scrollYProgress (0→1) is height-agnostic — spans whatever the page is.
   const { scrollYProgress } = useScroll();
   const sp = useSpring(scrollYProgress, { stiffness: 55, damping: 22, mass: 0.5 });
 
-  // ── Parallax layers (slowest → fastest) ───────────────────────────
-  // Negative = scrolls left = camera moves right through the world.
-  const xSky   = useTransform(sp, [0, 1], ['0%',   '-5%']);
-  const xFar   = useTransform(sp, [0, 1], ['0%',  '-15%']);
-  const xMid   = useTransform(sp, [0, 1], ['0%',  '-45%']);
-  const xRoad  = useTransform(sp, [0, 1], ['0%', '-120%']);
-  const xFg    = useTransform(sp, [0, 1], ['0%', '-160%']);
-  const xSigns = useTransform(sp, [0, 1], ['100%','-200%']);
+  // Parallax — fewer layers, bigger feel
+  const xFar  = useTransform(sp, [0, 1], ['0%',  '-20%']);
+  const xMid  = useTransform(sp, [0, 1], ['0%',  '-55%']);
+  const xRoad = useTransform(sp, [0, 1], ['0%', '-120%']);
 
-  // Sub-pixel vertical bob — sells "driving" without making people seasick.
-  const yBob = useTransform(sp, [0, 0.25, 0.5, 0.75, 1], [0, -3, 2, -3, 0]);
+  // Sun sinks across journey
+  const sunY  = useTransform(sp, [0, 1], [180, 360]);
+  const sunOp = useTransform(sp, [0, 0.6, 1], [0.85, 0.55, 0.3]);
 
-  // Sun/moon sinks through the journey (day → dusk feel)
-  const sunY  = useTransform(sp, [0, 1], [120, 320]);
-  const sunOp = useTransform(sp, [0, 0.6, 1], [0.85, 0.55, 0.25]);
-
-  // Stars fade in near the end (night falling)
-  const starOp = useTransform(sp, [0, 0.5, 1], [0.2, 0.5, 0.9]);
-
-  // Vignette tightens slightly at bottom of page
-  const vigOp = useTransform(sp, [0, 1], [0.35, 0.55]);
-
-  // ── Wheel rotation (direct DOM write — bypasses React, hits 60fps) ─
-  // Pivots match wheel centers after car shift: back=840, front=1080 at y=800
+  // Wheels spin (direct DOM write — 60fps, no React re-render)
   useMotionValueEvent(sp, 'change', (raw) => {
     const t = Math.max(0, Math.min(1, raw));
-    const deg = t * 1080; // 3 full rotations across the page
+    const deg = t * 1080;
     if (wheelFront.current) wheelFront.current.setAttribute('transform', `rotate(${deg} 1080 800)`);
     if (wheelBack.current)  wheelBack.current.setAttribute('transform',  `rotate(${deg} 840 800)`);
   });
 
-  // ── MOBILE: lightweight CSS-only aurora. No SVG, no scroll calc, no lag. ──
-  if (isMobile === true) {
-    return (
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          top: 0, left: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: -1,
-          pointerEvents: 'none',
-          overflow: 'hidden',
-          background:
-            'radial-gradient(ellipse 95% 60% at 30% 10%, rgba(212,175,55,0.18), transparent 65%),' +
-            'radial-gradient(ellipse 80% 50% at 80% 70%, rgba(0,212,255,0.14), transparent 65%),' +
-            'radial-gradient(ellipse 90% 55% at 50% 100%, rgba(124,58,237,0.18), transparent 65%),' +
-            'linear-gradient(180deg,#050510 0%, #0a1428 55%, #1a3a5c 100%)',
-        }}
-      />
-    );
-  }
-
-  // Detection pending → render nothing yet (prevents desktop flash on phones)
-  if (isMobile === null) return null;
-
-  // ── DESKTOP: full v8 SVG scene ──
   return (
     <div
       aria-hidden="true"
@@ -113,18 +50,18 @@ const ScrollBackdrop = () => {
         left: 0,
         width: '100vw',
         height: '100vh',
-        zIndex: -1, // sits behind .container (z:1); skill 04 spec
+        zIndex: 0, // DOM-order stacking: backdrop comes before hero/sections → painted below
         pointerEvents: 'none',
         overflow: 'hidden',
         background: 'linear-gradient(180deg,#050510 0%, #0a1428 55%, #1a3a5c 100%)',
       }}
     >
-      <motion.svg
+      <svg
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid slice"
         width="100%"
         height="100%"
-        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', y: yBob, display: 'block' }}
+        style={{ position: 'absolute', top: 0, left: 0, display: 'block' }}
       >
         <defs>
           <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
@@ -140,10 +77,6 @@ const ScrollBackdrop = () => {
             <stop offset="0%"  stopColor="#0e1f33" />
             <stop offset="100%" stopColor="#070d18" />
           </linearGradient>
-          <linearGradient id="roadGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"  stopColor="#1a1f28" />
-            <stop offset="100%" stopColor="#05070b" />
-          </linearGradient>
           <linearGradient id="carBody" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%"  stopColor="#f1cf5a" />
             <stop offset="55%" stopColor="#d4af37" />
@@ -153,103 +86,54 @@ const ScrollBackdrop = () => {
             <stop offset="0%"   stopColor="rgba(255,240,200,0.55)" />
             <stop offset="100%" stopColor="rgba(255,240,200,0)" />
           </radialGradient>
-          <radialGradient id="vignetteGrad" cx="50%" cy="55%" r="65%">
-            <stop offset="60%"  stopColor="rgba(0,0,0,0)" />
-            <stop offset="100%" stopColor="rgba(0,0,0,0.85)" />
-          </radialGradient>
         </defs>
 
-        {/* ── L0 Sky: clouds, sun, stars ── */}
-        <motion.g style={{ x: xSky }}>
-          <motion.circle cx="1500" r="180" fill="url(#sunGrad)" style={{ cy: sunY, opacity: sunOp }} />
-          <motion.g style={{ opacity: starOp }}>
-            {[[120,90],[340,60],[560,120],[780,70],[1020,110],[1260,80],[1480,140],
-              [1700,95],[1850,70],[220,180],[620,200],[1120,220],[1620,190]].map(([x,y],i)=>(
-              <circle key={i} cx={x} cy={y} r={i%3===0?1.6:1} fill="#e8f4ff" />
-            ))}
-          </motion.g>
-          <ellipse cx="400"  cy="200" rx="220" ry="14" fill="rgba(200,220,255,0.05)" />
-          <ellipse cx="1100" cy="260" rx="280" ry="16" fill="rgba(200,220,255,0.04)" />
-          <ellipse cx="1700" cy="180" rx="180" ry="12" fill="rgba(200,220,255,0.05)" />
-        </motion.g>
+        {/* Sun (sinks) */}
+        <motion.circle cx="1400" r="160" fill="url(#sunGrad)" style={{ cy: sunY, opacity: sunOp }} />
 
-        {/* ── L1 Distant Troodos silhouette ── */}
+        {/* L1 Distant mountains */}
         <motion.g style={{ x: xFar }}>
           <path
-            d="M -200 720 L 0 600 L 180 640 L 340 520 L 520 610 L 680 500 L 840 590
-               L 1020 480 L 1200 580 L 1360 510 L 1540 595 L 1720 530 L 1920 610
-               L 2120 580 L 2300 720 Z"
-            fill="url(#farGrad)" opacity="0.85"
+            d="M -200 740 L 200 580 L 500 660 L 760 540 L 1020 620 L 1280 540 L 1560 600 L 1920 560 L 2200 660 L 2400 740 Z"
+            fill="url(#farGrad)" opacity="0.9"
           />
         </motion.g>
 
-        {/* ── L2 Mid hills + cypress trees ── */}
+        {/* L2 Mid hills (single smooth wave, no individual trees) */}
         <motion.g style={{ x: xMid }}>
           <path
-            d="M -200 820 Q 200 700 480 780 T 980 760 T 1480 770 T 2120 740 L 2300 820 Z"
+            d="M -200 820 Q 300 720 700 790 T 1400 770 T 2100 760 L 2400 820 Z"
             fill="url(#midGrad)"
           />
-          {[200,420,640,880,1100,1340,1580,1820,2060].map((x,i)=>(
-            <g key={i} transform={`translate(${x},${755-(i%3)*8})`}>
-              <ellipse cx="0" cy="0" rx="6" ry="38" fill="#050b14" />
-              <rect x="-2" y="34" width="4" height="14" fill="#1a0f06" />
-            </g>
-          ))}
         </motion.g>
 
-        {/* ── L3 Roadside section signs (the "stops") ── */}
-        <motion.g style={{ x: xSigns }}>
-          {[{x:380,label:'FLEET'},{x:880,label:'REVIEWS'},{x:1380,label:'WHY US'},{x:1880,label:'CONTACT'}].map((s,i)=>(
-            <g key={i} transform={`translate(${s.x}, 720)`}>
-              <rect x="-3" y="0" width="6" height="100" fill="#2a1f10" />
-              <rect x="-72" y="-46" width="144" height="48" rx="4" fill="#0a1428" stroke="#d4af37" strokeWidth="2.5" />
-              <rect x="-66" y="-42" width="132" height="3" fill="#d4af37" opacity="0.6" />
-              <text x="0" y="-15" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif"
-                    fontSize="20" fontWeight="700" letterSpacing="2" fill="#f1cf5a">
-                {s.label}
-              </text>
-            </g>
-          ))}
-        </motion.g>
-
-        {/* ── L4 Road surface + lane dashes ── */}
+        {/* L3 Road — solid slab + CSS-style stripe via stroke-dasharray (1 line vs 60 rects) */}
         <motion.g style={{ x: xRoad }}>
-          <path d="M -200 820 L 2300 820 L 2300 1080 L -200 1080 Z" fill="url(#roadGrad)" />
-          <line x1="-200" y1="820" x2="2300" y2="820" stroke="#2a3340" strokeWidth="1.5" />
-          {Array.from({length:60}).map((_,i)=>(
-            <rect key={i} x={-200+i*80} y="940" width="42" height="6" rx="1" fill="#d4af37" opacity="0.55" />
-          ))}
-          <rect x="-200" y="818" width="2500" height="2" fill="rgba(0,212,255,0.35)" />
+          <rect x="-300" y="820" width="2700" height="260" fill="#0a0d14" />
+          <line x1="-300" y1="820" x2="2400" y2="820" stroke="rgba(0,212,255,0.4)" strokeWidth="2" />
+          <line
+            x1="-300" y1="940" x2="2400" y2="940"
+            stroke="#d4af37" strokeWidth="6"
+            strokeDasharray="44 36" opacity="0.7"
+          />
         </motion.g>
 
-        {/* ── L5 Foreground guard-rail posts (fastest) ── */}
-        <motion.g style={{ x: xFg }}>
-          {Array.from({length:25}).map((_,i)=>(
-            <g key={i} transform={`translate(${-200+i*110}, 880)`}>
-              <rect x="-2" y="0" width="4" height="36" fill="#1a1f28" />
-              <rect x="-12" y="-4" width="24" height="4" rx="1" fill="#2a3340" />
-            </g>
-          ))}
-        </motion.g>
-
-        {/* ── FOREGROUND: anchored sedan (side profile, centered at x≈960) ── */}
+        {/* FOREGROUND: anchored sedan (centered at viewBox x=960 → survives portrait crop) */}
         <g>
-          {/* Headlight cone — sweeps the road ahead */}
-          <ellipse cx="1220" cy="780" rx="260" ry="40" fill="url(#headlight)" />
-          {/* Ground shadow */}
+          <ellipse cx="1220" cy="780" rx="240" ry="36" fill="url(#headlight)" />
           <ellipse cx="960" cy="858" rx="320" ry="14" fill="rgba(0,0,0,0.55)" />
 
-          {/* Lower body */}
+          {/* Body */}
           <path
             d="M 620 780 L 680 740 L 820 720 L 940 700 L 1120 700
                L 1220 720 L 1280 750 L 1300 790 L 1280 820 L 640 820 Z"
             fill="url(#carBody)" stroke="#5a4612" strokeWidth="1.5"
           />
-          {/* Greenhouse (windows) */}
+          {/* Greenhouse */}
           <path d="M 780 720 L 860 660 L 1080 660 L 1140 720 Z"
                 fill="#0a1428" stroke="#5a4612" strokeWidth="1.5" />
-          <path d="M 800 715 L 870 668 L 980 668 L 970 715 Z" fill="rgba(0,212,255,0.18)" />
-          {/* Door seam + handle */}
+          <path d="M 800 715 L 870 668 L 980 668 L 970 715 Z" fill="rgba(0,212,255,0.22)" />
+          {/* Door */}
           <line x1="980" y1="720" x2="980" y2="790" stroke="#5a4612" strokeWidth="1" />
           <rect x="1010" y="755" width="22" height="3" rx="1" fill="#f1cf5a" />
           {/* Lights */}
@@ -259,7 +143,7 @@ const ScrollBackdrop = () => {
           <circle cx="840" cy="800" r="55" fill="#05070b" />
           <circle cx="1080" cy="800" r="55" fill="#05070b" />
 
-          {/* Spinning wheels (direct-DOM rotation via ref) */}
+          {/* Wheels spin */}
           <g ref={wheelBack}>
             <g transform="translate(840 800)">
               <circle r="46" fill="#0a0a0e" stroke="#2a3340" strokeWidth="2" />
@@ -281,16 +165,7 @@ const ScrollBackdrop = () => {
             </g>
           </g>
         </g>
-
-        {/* ── Vignette ── */}
-        <motion.rect x="0" y="0" width="1920" height="1080" fill="url(#vignetteGrad)" style={{ opacity: vigOp }} />
-      </motion.svg>
-
-      <style jsx>{`
-        @media (prefers-reduced-motion: reduce) {
-          svg * { transform: none !important; }
-        }
-      `}</style>
+      </svg>
     </div>
   );
 };

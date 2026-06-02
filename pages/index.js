@@ -166,7 +166,18 @@ const TEXT = {
 
 export default function Home() {
   const [lang, setLang] = useState('en');
-  const [langModalOpen, setLangModalOpen] = useState(true);
+  // Modal only on FIRST visit. After picking, store in localStorage so reloads skip it.
+  const [langModalOpen, setLangModalOpen] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = window.localStorage?.getItem('cyr_lang');
+    if (stored === 'en' || stored === 'tr') {
+      setLang(stored);
+      setLangModalOpen(false);
+    } else {
+      setLangModalOpen(true);
+    }
+  }, []);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
@@ -276,6 +287,9 @@ export default function Home() {
   const handleSelectLanguage = (selectedLang) => {
     setLang(selectedLang);
     setLangModalOpen(false);
+    if (typeof window !== 'undefined') {
+      try { window.localStorage?.setItem('cyr_lang', selectedLang); } catch (e) {}
+    }
   };
 
   const handleInquire = (car) => {
