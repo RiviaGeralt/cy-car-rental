@@ -275,13 +275,14 @@ function CinematicRig({ children }) {
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.2 } },
+  // Faster entry on mobile (dynamic import already delays first paint)
+  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
 };
 
 // PERF: removed filter:blur — CSS filter animation is heavy on GPU compositing
 const itemVariants = {
-  hidden: { opacity: 0, y: 22 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.2, 0.8, 0.2, 1] } },
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.2, 0.8, 0.2, 1] } },
 };
 
 function AnimatedTitle({ text }) {
@@ -535,10 +536,14 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
           50%       { opacity: 1;   transform: scaleY(1); }
         }
         @media (max-width: 768px) {
-          .hc-wrap { height: 95vh; min-height: 600px; }
+          .hc-wrap { height: 100svh; min-height: 600px; }
+          /* No 3D car on mobile → center content vertically */
+          .hc-content {
+            justify-content: center;
+            padding: 1.5rem 1.5rem 5rem;
+          }
         }
         @media (max-width: 480px) {
-          .hc-content { padding-top: 4rem; }
           .hc-chips { gap: 0.4rem; margin-bottom: 1.6rem; }
           .hc-chip { padding: 0.4rem 0.7rem; font-size: 0.78rem; }
           .hc-cta-row { flex-direction: column; width: 100%; padding: 0 1rem; }
