@@ -138,7 +138,7 @@
 }
 
 .carCard {
-  background: rgba(20, 30, 48, 0.5);
+  background: rgba(20, 30, 48, 0.25);
   border: 1px solid rgba(0, 212, 255, 0.2);
   position: relative;
   animation: slideUp 0.6s ease-out forwards;
@@ -781,7 +781,7 @@
 }
 
 .testimonialCard {
-  background: rgba(20, 30, 48, 0.5);
+  background: rgba(20, 30, 48, 0.22);
   border: 1px solid rgba(0, 212, 255, 0.2);
   padding: 40px;
   border-radius: 16px;
