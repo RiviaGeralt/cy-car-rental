@@ -349,8 +349,11 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
   const wrapRef = useRef(null);
 
   const { scrollY } = useScroll();
-  const yContent = useTransform(scrollY, [0, 600], [0, -140]);
-  const opacityContent = useTransform(scrollY, [0, 520], [1, 0]);
+  // Wider range so content doesn't fade before hero scrolls fully off.
+  // On mobile, scrollY can restore to non-zero via back-forward cache
+  // which would make [0,520]→opacity:0 fire immediately = blank hero.
+  const yContent = useTransform(scrollY, [0, 800], [0, -120]);
+  const opacityContent = useTransform(scrollY, [200, 900], [1, 0]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -629,7 +632,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
           <motion.div
             key={`lang-${language}`}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.2 }}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
           >
             <motion.div className="hc-eyebrow" variants={itemVariants}>{t.eyebrow}</motion.div>
