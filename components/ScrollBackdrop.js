@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from 'framer-motion';
 
 /**
@@ -32,6 +32,15 @@ import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from 
 const ScrollBackdrop = () => {
   const wheelFront = useRef(null);
   const wheelBack  = useRef(null);
+
+  // Mobile detection: bail out of the heavy SVG entirely on phones.
+  // Reason: overflow-x:hidden on html/body clips fixed children on iOS Safari,
+  // and 100+ animated SVG nodes lag mobile GPUs. CSS-only fallback below.
+  const [isMobile, setIsMobile] = useState(null); // null = detecting, prevents desktop flash
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setIsMobile(window.matchMedia('(pointer: coarse)').matches);
+  }, []);
 
   // scrollYProgress (0→1) is height-agnostic — spans whatever the page is.
   const { scrollYProgress } = useScroll();
@@ -68,6 +77,33 @@ const ScrollBackdrop = () => {
     if (wheelBack.current)  wheelBack.current.setAttribute('transform',  `rotate(${deg} 840 800)`);
   });
 
+  // ── MOBILE: lightweight CSS-only aurora. No SVG, no scroll calc, no lag. ──
+  if (isMobile === true) {
+    return (
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          top: 0, left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: -1,
+          pointerEvents: 'none',
+          overflow: 'hidden',
+          background:
+            'radial-gradient(ellipse 95% 60% at 30% 10%, rgba(212,175,55,0.18), transparent 65%),' +
+            'radial-gradient(ellipse 80% 50% at 80% 70%, rgba(0,212,255,0.14), transparent 65%),' +
+            'radial-gradient(ellipse 90% 55% at 50% 100%, rgba(124,58,237,0.18), transparent 65%),' +
+            'linear-gradient(180deg,#050510 0%, #0a1428 55%, #1a3a5c 100%)',
+        }}
+      />
+    );
+  }
+
+  // Detection pending → render nothing yet (prevents desktop flash on phones)
+  if (isMobile === null) return null;
+
+  // ── DESKTOP: full v8 SVG scene ──
   return (
     <div
       aria-hidden="true"
