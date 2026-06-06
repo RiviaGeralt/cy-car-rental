@@ -1,23 +1,24 @@
 /* ─── Keyframes ──────────────────────────────────────────────────────────── */
 
-@keyframes lux-a {
-  0%,  100% { transform: translate(0%,  0%)  scale(1.00); }
-  25%        { transform: translate(4%,  6%)  scale(1.07); }
-  60%        { transform: translate(-3%, 3%)  scale(0.96); }
-  80%        { transform: translate(3%, -2%)  scale(1.03); }
+/*
+ * CSS animations run on the inner .carSvg element.
+ * framer-motion scroll transforms run on the outer .carSlot wrapper.
+ * Two separate transform targets → no conflict.
+ */
+
+@keyframes carFloat1 {
+  0%,  100% { transform: translateY(0px); }
+  50%        { transform: translateY(-18px); }
 }
 
-@keyframes lux-b {
-  0%,  100% { transform: translate(0%,  0%)  scale(1.00); }
-  30%        { transform: translate(-5%,-4%)  scale(1.10); }
-  65%        { transform: translate(4%, -3%)  scale(0.94); }
-  85%        { transform: translate(-2%, 5%)  scale(1.05); }
+@keyframes carFloat2 {
+  0%,  100% { transform: translateY(0px); }
+  50%        { transform: translateY(15px); }
 }
 
-@keyframes lux-c {
-  0%,  100% { transform: translate(0%,  0%)  scale(1.00); }
-  40%        { transform: translate(3%, -6%)  scale(1.08); }
-  75%        { transform: translate(-4%, 2%)  scale(0.95); }
+@keyframes carFloat3 {
+  0%,  100% { transform: translateY(0px); }
+  50%        { transform: translateY(-12px); }
 }
 
 /* ─── Root ───────────────────────────────────────────────────────────────── */
@@ -31,77 +32,68 @@
   background: #050510;
 }
 
-/* ─── Orb Slot (scroll-driven position layer) ────────────────────────────── */
+/* ─── Car Slot (scroll-driven position layer) ────────────────────────────── */
 
 /*
- * Each orbSlot is a full-viewport wrapper that framer-motion translates/scales
- * per scroll position. The inner .orb runs its CSS @keyframes animation
- * independently — two transform targets, no conflict.
- *
- * position: absolute makes orbSlot the containing block for inner .orb divs.
- * inset: 0 ensures 100% × 100% of .root, so % translate = % of viewport.
+ * .carSlot is the framer-motion target: positioned absolutely with explicit
+ * top/left/right values per car. framer-motion applies x/y/scale/opacity on
+ * this element. The inner .carSvg runs @keyframes float independently.
  */
 
-.orbSlot {
+.carSlot {
   position: absolute;
-  inset: 0;
   pointer-events: none;
 }
 
-/* ─── Orbs ───────────────────────────────────────────────────────────────── */
+/* ─── Individual car positions ───────────────────────────────────────────── */
 
-.orb {
-  position: absolute;
-  border-radius: 50%;
+/* Car 1: large, left side, gold tint */
+.car1 {
+  width: 580px;
+  top: 8%;
+  left: -5%;
+  /* CSS currentColor drives SVG stroke="currentColor" */
+  color: rgba(212, 175, 55, 1);
+}
+
+/* Car 2: medium, right side, faces left via scaleX(-1), silver-white tint */
+.car2 {
+  width: 400px;
+  top: 50%;
+  right: -8%;
+  transform: scaleX(-1);
+  color: rgba(220, 220, 240, 1);
+}
+
+/* Car 3: small, bottom center, gold tint */
+.car3 {
+  width: 280px;
+  bottom: 8%;
+  left: 25%;
+  color: rgba(212, 175, 55, 1);
+}
+
+/* ─── SVG base ───────────────────────────────────────────────────────────── */
+
+.carSvg {
+  width: 100%;
+  height: auto;
+  display: block;
   will-change: transform;
 }
 
-/* Gold — top-left */
-.orb1 {
-  width: 680px;
-  height: 680px;
-  top: -12%;
-  left: -8%;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(253, 230, 138, 0.22) 0%,
-    rgba(212, 175,  55, 0.10) 40%,
-    transparent 70%
-  );
-  filter: blur(90px);
-  animation: lux-a 42s ease-in-out infinite;
+/* ─── Float animations (applied to inner SVG, not the slot wrapper) ──────── */
+
+.carFloat1 {
+  animation: carFloat1 24s ease-in-out infinite;
 }
 
-/* Violet — top-right */
-.orb2 {
-  width: 860px;
-  height: 860px;
-  top: -25%;
-  right: -18%;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(167, 139, 250, 0.16) 0%,
-    rgba(109,  40, 217, 0.07) 45%,
-    transparent 70%
-  );
-  filter: blur(100px);
-  animation: lux-b 58s ease-in-out infinite;
+.carFloat2 {
+  animation: carFloat2 31s ease-in-out infinite;
 }
 
-/* Ember — bottom-center */
-.orb3 {
-  width: 560px;
-  height: 560px;
-  bottom: -18%;
-  left: 28%;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(249, 115, 22, 0.13) 0%,
-    rgba(234,  88, 12, 0.05) 45%,
-    transparent 70%
-  );
-  filter: blur(80px);
-  animation: lux-c 48s ease-in-out infinite;
+.carFloat3 {
+  animation: carFloat3 19s ease-in-out infinite;
 }
 
 /* ─── Vignette ───────────────────────────────────────────────────────────── */
@@ -112,7 +104,7 @@
   background: radial-gradient(
     ellipse 110% 110% at 50% 40%,
     transparent 25%,
-    rgba(0, 0, 0, 0.60) 100%
+    rgba(0, 0, 0, 0.65) 100%
   );
 }
 
@@ -129,7 +121,7 @@
   background-size: 256px 256px;
 }
 
-/* ─── Brand hairline ─────────────────────────────────────────────────────── */
+/* ─── Brand gold hairline ────────────────────────────────────────────────── */
 
 .topLine {
   position: absolute;
@@ -150,16 +142,35 @@
 /* ─── Reduced motion ─────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .orb1, .orb2, .orb3 {
+  .carFloat1,
+  .carFloat2,
+  .carFloat3 {
     animation: none;
   }
 }
 
-/* ─── Mobile ─────────────────────────────────────────────────────────────── */
+/* ─── Mobile (~40% scale reduction, lighter grain) ───────────────────────── */
 
 @media (max-width: 768px) {
-  .orb1 { width: 360px; height: 360px; filter: blur(70px); }
-  .orb2 { width: 460px; height: 460px; filter: blur(80px); }
-  .orb3 { width: 300px; height: 300px; filter: blur(60px); }
-  .grain { opacity: 0.025; }
+  .car1 {
+    width: 348px;
+    left: -8%;
+    top: 5%;
+  }
+
+  .car2 {
+    width: 240px;
+    right: -10%;
+    top: 45%;
+  }
+
+  .car3 {
+    width: 168px;
+    bottom: 6%;
+    left: 20%;
+  }
+
+  .grain {
+    opacity: 0.025;
+  }
 }
