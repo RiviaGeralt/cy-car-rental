@@ -31,6 +31,23 @@
   background: #050510;
 }
 
+/* ─── Orb Slot (scroll-driven position layer) ────────────────────────────── */
+
+/*
+ * Each orbSlot is a full-viewport wrapper that framer-motion translates/scales
+ * per scroll position. The inner .orb runs its CSS @keyframes animation
+ * independently — two transform targets, no conflict.
+ *
+ * position: absolute makes orbSlot the containing block for inner .orb divs.
+ * inset: 0 ensures 100% × 100% of .root, so % translate = % of viewport.
+ */
+
+.orbSlot {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 /* ─── Orbs ───────────────────────────────────────────────────────────────── */
 
 .orb {
