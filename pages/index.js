@@ -25,9 +25,9 @@ const Hero3D = dynamic(() => import('../components/HeroCinematic'), {
   )
 });
 
-// Page-wide scroll-reactive parallax backdrop (orbs + aurora + grain).
-// Mounted once at page root, visible behind every section.
-const ScrollBackdrop = dynamic(() => import('../components/ScrollBackdrop'), { ssr: false });
+// Page-wide luxury ambient background — deep black + drifting gold/violet orbs + grain.
+// Pure CSS keyframes (zero JS per frame). Replaces ScrollBackdrop v9 road-trip SVG.
+const LuxuryBackground = dynamic(() => import('../components/LuxuryBackground'), { ssr: false });
 
 // Form submission (server handles Formspree endpoint — hidden from browser)
 const FORM_ENDPOINT = '/api/submit-form';
@@ -357,8 +357,8 @@ export default function Home() {
       </Script>
 
       <div className={styles.container}>
-        {/* Site-wide animated background — orbs + aurora parallax on every scroll */}
-        <ScrollBackdrop />
+        {/* Site-wide luxury ambient background — drifting orbs + grain + vignette */}
+        <LuxuryBackground />
 
         {/* Language Modal - appears on first load */}
         {langModalOpen && (
