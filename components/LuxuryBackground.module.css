@@ -1,99 +1,78 @@
-/* ─── Keyframes ──────────────────────────────────────────────────────────── */
-
-/*
- * CSS animations run on the inner .carSvg element.
- * framer-motion scroll transforms run on the outer .carSlot wrapper.
- * Two separate transform targets → no conflict.
- */
-
-@keyframes carFloat1 {
-  0%,  100% { transform: translateY(0px); }
-  50%        { transform: translateY(-18px); }
-}
-
-@keyframes carFloat2 {
-  0%,  100% { transform: translateY(0px); }
-  50%        { transform: translateY(15px); }
-}
-
-@keyframes carFloat3 {
-  0%,  100% { transform: translateY(0px); }
-  50%        { transform: translateY(-12px); }
-}
-
-/* ─── Root ───────────────────────────────────────────────────────────────── */
+/* ─── Root wrapper ───────────────────────────────────────────────────────── */
 
 .root {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
   background: #050510;
 }
 
-/* ─── Car Slot (scroll-driven position layer) ────────────────────────────── */
+/* ─── Canvas (Night Drive scene) ─────────────────────────────────────────── */
 
-/*
- * .carSlot is the framer-motion target: positioned absolutely with explicit
- * top/left/right values per car. framer-motion applies x/y/scale/opacity on
- * this element. The inner .carSvg runs @keyframes float independently.
- */
-
-.carSlot {
+.canvas {
   position: absolute;
-  pointer-events: none;
-}
-
-/* ─── Individual car positions ───────────────────────────────────────────── */
-
-/* Car 1: large, left side, gold tint */
-.car1 {
-  width: 580px;
-  top: 8%;
-  left: -5%;
-  /* CSS currentColor drives SVG stroke="currentColor" */
-  color: rgba(212, 175, 55, 1);
-}
-
-/* Car 2: medium, right side, faces left via scaleX(-1), silver-white tint */
-.car2 {
-  width: 400px;
-  top: 50%;
-  right: -8%;
-  transform: scaleX(-1);
-  color: rgba(220, 220, 240, 1);
-}
-
-/* Car 3: small, bottom center, gold tint */
-.car3 {
-  width: 280px;
-  bottom: 8%;
-  left: 25%;
-  color: rgba(212, 175, 55, 1);
-}
-
-/* ─── SVG base ───────────────────────────────────────────────────────────── */
-
-.carSvg {
+  top: 0;
+  left: 0;
   width: 100%;
-  height: auto;
-  display: block;
+  height: 100%;
+  will-change: contents;
+}
+
+/* ─── Aurora overlay layers (compositor thread, mix-blend-mode: screen) ───── */
+
+.auroraLayer {
+  position: absolute;
+  inset: -25%;
+  border-radius: 40%;
+  mix-blend-mode: screen;
   will-change: transform;
 }
 
-/* ─── Float animations (applied to inner SVG, not the slot wrapper) ──────── */
-
-.carFloat1 {
-  animation: carFloat1 24s ease-in-out infinite;
+.aurora1 {
+  background: conic-gradient(
+    from 0deg at 30% 35%,
+    transparent 0deg,
+    rgba(109, 40, 217, 0.45) 55deg,
+    transparent 110deg
+  );
+  filter: blur(70px);
+  opacity: 0.10;
+  animation: auroraRotate 32s linear infinite;
 }
 
-.carFloat2 {
-  animation: carFloat2 31s ease-in-out infinite;
+.aurora2 {
+  background: conic-gradient(
+    from 200deg at 72% 30%,
+    transparent 0deg,
+    rgba(212, 175, 55, 0.35) 40deg,
+    transparent 80deg
+  );
+  filter: blur(80px);
+  opacity: 0.09;
+  animation: auroraRotate 48s linear infinite reverse;
 }
 
-.carFloat3 {
-  animation: carFloat3 19s ease-in-out infinite;
+.aurora3 {
+  background: conic-gradient(
+    from 100deg at 55% 65%,
+    transparent 0deg,
+    rgba(109, 40, 217, 0.25) 25deg,
+    rgba(212, 175, 55, 0.15) 50deg,
+    transparent 75deg
+  );
+  filter: blur(90px);
+  opacity: 0.08;
+  animation: auroraRotate 38s linear infinite;
+}
+
+@keyframes auroraRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 /* ─── Vignette ───────────────────────────────────────────────────────────── */
@@ -102,23 +81,10 @@
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    ellipse 110% 110% at 50% 40%,
-    transparent 25%,
-    rgba(0, 0, 0, 0.65) 100%
+    ellipse 100% 90% at 50% 50%,
+    transparent 35%,
+    rgba(0, 0, 0, 0.55) 100%
   );
-}
-
-/* ─── Grain ──────────────────────────────────────────────────────────────── */
-
-.grain {
-  position: absolute;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
-  opacity: 0.04;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 256px 256px;
 }
 
 /* ─── Brand gold hairline ────────────────────────────────────────────────── */
@@ -142,35 +108,21 @@
 /* ─── Reduced motion ─────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .carFloat1,
-  .carFloat2,
-  .carFloat3 {
-    animation: none;
-  }
+  .aurora1, .aurora2, .aurora3 { animation: none; }
 }
 
-/* ─── Mobile (~40% scale reduction, lighter grain) ───────────────────────── */
+/* ─── Mobile: canvas off, promote aurora ────────────────────────────────── */
 
-@media (max-width: 768px) {
-  .car1 {
-    width: 348px;
-    left: -8%;
-    top: 5%;
-  }
-
-  .car2 {
-    width: 240px;
-    right: -10%;
-    top: 45%;
-  }
-
-  .car3 {
-    width: 168px;
-    bottom: 6%;
-    left: 20%;
-  }
-
-  .grain {
-    opacity: 0.025;
+@media (pointer: coarse) {
+  .canvas { display: none; }
+  .aurora1 { opacity: 0.18; }
+  .aurora2 { opacity: 0.15; }
+  .aurora3 { opacity: 0.12; }
+  .root {
+    background: radial-gradient(
+      ellipse at 50% 100%,
+      rgba(212, 175, 55, 0.07) 0%,
+      #050510 60%
+    );
   }
 }
