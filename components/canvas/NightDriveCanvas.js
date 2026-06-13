@@ -11,7 +11,7 @@ export class NightDriveCanvas {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.isMobile = isMobile;
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     this.w = 0; this.h = 0;
     this.tick = 0;
     this.rafId = null;
@@ -31,7 +31,7 @@ export class NightDriveCanvas {
     this.canvas.style.width = this.w + 'px';
     this.canvas.style.height = this.h + 'px';
     this.ctx.scale(this.dpr, this.dpr);
-    const count = this.isMobile ? 25 : 60;
+    const count = this.isMobile ? 12 : 30;
     this.particles = createBokehPool(this.w, this.h, count);
   }
 

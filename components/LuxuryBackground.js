@@ -22,25 +22,43 @@ export default function LuxuryBackground() {
     const isMobile = window.matchMedia('(pointer: coarse)').matches
       || (navigator.hardwareConcurrency != null && navigator.hardwareConcurrency <= 2);
 
+    let intersectionObs = null;
+
     if (!isMobile && canvasRef.current) {
       import('./canvas/NightDriveCanvas.js').then(({ NightDriveCanvas }) => {
         if (!canvasRef.current) return;
         const engine = new NightDriveCanvas(canvasRef.current, false);
         engineRef.current = engine;
         engine.start();
+
+        // Pause canvas rAF when element is off-screen (saves a full rAF loop while scrolled past hero)
+        intersectionObs = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) {
+              engine.start();
+            } else {
+              engine.stop();
+            }
+          },
+          { threshold: 0 }
+        );
+        intersectionObs.observe(canvasRef.current);
       });
     }
 
-    // Read scroll every RAF tick — passive, no scroll event
-    const readScroll = () => {
-      if (engineRef.current) {
-        const maxScroll = document.body.scrollHeight - window.innerHeight;
-        const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
-        engineRef.current.setScrollProgress(progress);
-      }
+    // Read scroll every RAF tick — desktop only, not needed on mobile (no canvas engine)
+    let readScroll = null;
+    if (!isMobile) {
+      readScroll = () => {
+        if (engineRef.current) {
+          const maxScroll = document.body.scrollHeight - window.innerHeight;
+          const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+          engineRef.current.setScrollProgress(progress);
+        }
+        scrollRafRef.current = requestAnimationFrame(readScroll);
+      };
       scrollRafRef.current = requestAnimationFrame(readScroll);
-    };
-    scrollRafRef.current = requestAnimationFrame(readScroll);
+    }
 
     // Resize (debounced)
     let resizeTimer;
@@ -57,12 +75,13 @@ export default function LuxuryBackground() {
         cancelAnimationFrame(scrollRafRef.current);
       } else {
         engineRef.current?.start();
-        scrollRafRef.current = requestAnimationFrame(readScroll);
+        if (readScroll) scrollRafRef.current = requestAnimationFrame(readScroll);
       }
     };
     document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
+      intersectionObs?.disconnect();
       engineRef.current?.destroy();
       engineRef.current = null;
       cancelAnimationFrame(scrollRafRef.current);

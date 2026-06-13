@@ -26,12 +26,10 @@ export function drawBokeh(ctx, particles, w, h, tick, densityFactor) {
     if (p.x > w) p.x = 0;
     const pulse = 0.5 + 0.5 * Math.sin(tick * p.pulseFreq + p.phase);
     const a = p.alpha * pulse;
-    ctx.shadowBlur = p.r * 5;
-    ctx.shadowColor = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${a})`;
-    ctx.fillStyle = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${a * 0.8})`;
+    // shadowBlur removed — Canvas2D software blur is the #1 scroll jank cause
+    ctx.fillStyle = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${a})`;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, TAU);
+    ctx.arc(p.x, p.y, p.r * 1.4, 0, TAU); // slightly larger radius compensates for no glow
     ctx.fill();
   }
-  ctx.shadowBlur = 0;
 }
