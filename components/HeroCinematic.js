@@ -274,9 +274,9 @@ function CinematicRig({ children }) {
 /* ─────────────────── Framer helpers ─────────────────── */
 
 const containerVariants = {
-  hidden: { opacity: 0 },
-  // Faster entry on mobile (dynamic import already delays first paint)
-  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+  // No opacity on container — scroll useTransform handles it; children animate individually
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
 };
 
 // PERF: removed filter:blur — CSS filter animation is heavy on GPU compositing
@@ -418,7 +418,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             radial-gradient(ellipse 75% 55% at 88% 65%, rgba(249,115,22,0.25), transparent 65%),
             radial-gradient(ellipse 60% 50% at 15% 80%, rgba(167,139,250,0.18), transparent 65%);
           animation: hcAurora1 11s ease-in-out infinite alternate;
-          will-change: transform, opacity;
+          will-change: transform;
         }
         .hc-bg::after {
           content: '';
@@ -427,7 +427,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             radial-gradient(ellipse 70% 50% at 75% 10%, rgba(249,115,22,0.20), transparent 65%),
             radial-gradient(ellipse 55% 45% at 25% 55%, rgba(250,204,21,0.12), transparent 65%);
           animation: hcAurora2 16s ease-in-out infinite alternate-reverse;
-          will-change: transform, opacity;
+          will-change: transform;
         }
         @keyframes hcAurora1 {
           0%   { opacity: 0.65; transform: scale(1) translateX(0) translateY(0); }

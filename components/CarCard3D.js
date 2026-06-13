@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 /**
@@ -7,6 +7,10 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
  */
 const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
   const ref = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMobile(window.matchMedia('(pointer: coarse)').matches);
+  }, []);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
 
@@ -30,7 +34,7 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
       ref={ref}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
-      style={{ rotateX: rotX, rotateY: rotY, transformStyle: 'preserve-3d', perspective: 1000 }}
+      style={isMobile ? {} : { rotateX: rotX, rotateY: rotY, transformStyle: 'preserve-3d', perspective: 1000 }}
       initial={{ opacity: 0, y: 60 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
@@ -47,8 +51,8 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
           border-radius: 20px;
           padding: 0;
           overflow: hidden;
-          backdrop-filter: blur(20px) saturate(140%);
-          -webkit-backdrop-filter: blur(20px) saturate(140%);
+          backdrop-filter: blur(5px) saturate(120%);
+          -webkit-backdrop-filter: blur(5px) saturate(120%);
           box-shadow:
             0 20px 60px rgba(0,0,0,0.4),
             0 0 0 1px rgba(255,255,255,0.04) inset;
@@ -85,7 +89,7 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
           position: absolute; top: 14px; right: 14px;
           padding: 0.35rem 0.8rem; border-radius: 999px;
           background: rgba(0,0,0,0.55);
-          backdrop-filter: blur(10px);
+          backdrop-filter: blur(5px);
           color: #facc15; font-weight: 600; font-size: 0.78rem;
           letter-spacing: 0.08em; border: 1px solid rgba(250,204,21,0.3);
         }
@@ -135,6 +139,14 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
         .btn:hover {
           transform: translateY(-2px);
           box-shadow: 0 12px 30px rgba(249, 115, 22, 0.45);
+        }
+        @media (max-width: 768px) {
+          .card3d {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            will-change: auto;
+          }
+          .year-badge { backdrop-filter: none; }
         }
       `}</style>
 
