@@ -80,10 +80,13 @@
 .vignette {
   position: absolute;
   inset: 0;
+  /* Wider transparent center + lighter edge — was dimming corner headers
+     ("What Our Guests Say", "Why Choose Cyprus Road") on mobile because
+     vignette is position:fixed, so it sits over EVERY scroll position. */
   background: radial-gradient(
-    ellipse 100% 90% at 50% 50%,
-    transparent 35%,
-    rgba(0, 0, 0, 0.55) 100%
+    ellipse 110% 100% at 50% 50%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.30) 100%
   );
 }
 
@@ -118,6 +121,15 @@
   .aurora1 { opacity: 0.18; }
   .aurora2 { opacity: 0.15; }
   .aurora3 { opacity: 0.12; }
+  /* Even softer vignette on mobile — fixed vignette + small viewport meant
+     more of every section sat in the dimmed corner zone. */
+  .vignette {
+    background: radial-gradient(
+      ellipse 130% 110% at 50% 50%,
+      transparent 65%,
+      rgba(0, 0, 0, 0.18) 100%
+    );
+  }
   .root {
     background: radial-gradient(
       ellipse at 50% 100%,

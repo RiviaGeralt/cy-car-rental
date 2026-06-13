@@ -1468,11 +1468,20 @@
 .benefitsHeader h2,
 .cta h2 {
   font-size: clamp(2rem, 5vw, 3.5rem);
-  background: linear-gradient(180deg, #fff 0%, #facc15 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  /* Solid white with deep text-shadow — cream→yellow gradient was invisible
+     against gold/orange aurora orbs on laptop and dimmed corners on mobile.
+     White always reads against any backdrop in this dark theme. */
+  color: #ffffff;
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: #ffffff;
   letter-spacing: -0.03em;
+  text-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.75),
+    0 0 32px rgba(0, 0, 0, 0.55);
+  position: relative;
+  z-index: 2;
 }
 .fleetHeader p,
 .benefitsHeader p {

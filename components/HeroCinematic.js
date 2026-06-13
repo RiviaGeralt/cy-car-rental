@@ -6,7 +6,7 @@ import {
 } from '@react-three/drei';
 import {
   motion, useScroll, useTransform, useSpring,
-  useMotionValue, AnimatePresence,
+  useMotionValue,
 } from 'framer-motion';
 import * as THREE from 'three';
 
@@ -349,11 +349,10 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
   const wrapRef = useRef(null);
 
   const { scrollY } = useScroll();
-  // Wider range so content doesn't fade before hero scrolls fully off.
-  // On mobile, scrollY can restore to non-zero via back-forward cache
-  // which would make [0,520]→opacity:0 fire immediately = blank hero.
-  const yContent = useTransform(scrollY, [0, 800], [0, -120]);
-  const opacityContent = useTransform(scrollY, [200, 900], [1, 0]);
+  // Mobile back-forward cache can restore scrollY > 200 on mount → hero invisible.
+  // Push fade range way out so content stays visible at every reasonable scroll restore.
+  const yContent = useTransform(scrollY, [0, 1200], [0, -120]);
+  const opacityContent = useTransform(scrollY, [700, 1400], [1, 0]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -391,7 +390,20 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
   };
 
   return (
-    <section ref={wrapRef} className="hc-wrap">
+    <section
+      ref={wrapRef}
+      className="hc-wrap"
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100vh',
+        minHeight: 600,
+        overflow: 'hidden',
+        isolation: 'isolate',
+        touchAction: 'pan-y',
+        background: '#050510',
+      }}
+    >
       <style jsx>{`
         .hc-wrap {
           position: relative;
@@ -554,8 +566,24 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         }
       `}</style>
 
-      {/* Layer 0 — CSS animated aurora background (always visible) */}
-      <div className="hc-bg" />
+      {/* Layer 0 — CSS animated aurora background (always visible).
+          Inline gradient + dark bg are FOUC fallback for mobile where
+          styled-jsx ::before/::after animations sometimes don't apply
+          on first paint. Animated layer enhances when jsx mounts. */}
+      <div
+        className="hc-bg"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          background:
+            'radial-gradient(ellipse 90% 65% at 40% -5%, rgba(124,58,237,0.35), transparent 65%),' +
+            'radial-gradient(ellipse 75% 55% at 88% 65%, rgba(249,115,22,0.25), transparent 65%),' +
+            'radial-gradient(ellipse 60% 50% at 15% 80%, rgba(167,139,250,0.18), transparent 65%),' +
+            '#050510',
+          overflow: 'hidden',
+        }}
+      />
 
       {/* Layer 1 — WebGL 3D canvas (desktop only, null = still detecting) */}
       {supports3D === true ? (
@@ -604,7 +632,8 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
 
               <CinematicRig>
                 <Float speed={0.7} rotationIntensity={0.05} floatIntensity={0.12}>
-                  <Suspense fallback={<SculptCar />}>
+                  {/* fallback={null}: don't flash old procedural car before Ferrari GLB resolves */}
+                  <Suspense fallback={null}>
                     <Ferrari />
                   </Suspense>
                 </Float>
@@ -620,45 +649,52 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
       {/* Layer 3 — film grain */}
       <div className="hc-grain" />
 
-      {/* Layer 5 — UI content */}
+      {/* Layer 5 — UI content. Inline critical layout prevents FOUC where
+          style-jsx hasn't applied yet and content collapses to top-left.
+          AnimatePresence removed: it was causing a flash on every language change. */}
       <motion.div
         className="hc-content"
-        style={{ y: yContent, opacity: opacityContent }}
+        style={{
+          y: yContent,
+          opacity: opacityContent,
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          textAlign: 'center',
+          padding: 'clamp(2rem, 8vh, 5rem) 2rem 0',
+          zIndex: 5,
+          pointerEvents: 'none',
+        }}
         variants={containerVariants}
         initial="hidden"
         animate="show"
+        key={`lang-${language}`}
       >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`lang-${language}`}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-          >
-            <motion.div className="hc-eyebrow" variants={itemVariants}>{t.eyebrow}</motion.div>
-            <AnimatedTitle text={t.title} />
-            <motion.p className="hc-sub" variants={itemVariants}>{t.sub}</motion.p>
-            <motion.div className="hc-chips" variants={itemVariants}>
-              {[t.chip1, t.chip2, t.chip3].map((c, i) => (
-                <motion.span key={i} className="hc-chip"
-                  whileHover={{ y: -3, backgroundColor: 'rgba(250,204,21,0.12)', borderColor: 'rgba(250,204,21,0.35)' }}
-                  transition={{ duration: 0.2 }}>
-                  <span>✦</span><span>{c}</span>
-                </motion.span>
-              ))}
-            </motion.div>
-            <motion.div className="hc-cta-row" variants={itemVariants}>
-              <MagneticCTA className="hc-cta-primary" onClick={onCTA}>{t.cta} →</MagneticCTA>
-              <motion.a className="hc-cta-secondary"
-                href="https://wa.me/903924440000" target="_blank" rel="noopener noreferrer"
-                whileHover={{ backgroundColor: 'rgba(255,255,255,0.10)', y: -2 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.2 }}>
-                <span>💬</span><span>WhatsApp</span>
-              </motion.a>
-            </motion.div>
-          </motion.div>
-        </AnimatePresence>
+        <motion.div className="hc-eyebrow" variants={itemVariants}>{t.eyebrow}</motion.div>
+        <AnimatedTitle text={t.title} />
+        <motion.p className="hc-sub" variants={itemVariants}>{t.sub}</motion.p>
+        <motion.div className="hc-chips" variants={itemVariants} style={{ pointerEvents: 'auto' }}>
+          {[t.chip1, t.chip2, t.chip3].map((c, i) => (
+            <motion.span key={i} className="hc-chip"
+              whileHover={{ y: -3, backgroundColor: 'rgba(250,204,21,0.12)', borderColor: 'rgba(250,204,21,0.35)' }}
+              transition={{ duration: 0.2 }}>
+              <span>✦</span><span>{c}</span>
+            </motion.span>
+          ))}
+        </motion.div>
+        <motion.div className="hc-cta-row" variants={itemVariants} style={{ pointerEvents: 'auto' }}>
+          <MagneticCTA className="hc-cta-primary" onClick={onCTA}>{t.cta} →</MagneticCTA>
+          <motion.a className="hc-cta-secondary"
+            href="https://wa.me/903924440000" target="_blank" rel="noopener noreferrer"
+            whileHover={{ backgroundColor: 'rgba(255,255,255,0.10)', y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.2 }}>
+            <span>💬</span><span>WhatsApp</span>
+          </motion.a>
+        </motion.div>
       </motion.div>
 
       <motion.div className="hc-scroll-cue"

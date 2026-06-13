@@ -44,22 +44,24 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
       <style jsx>{`
         .card3d {
           position: relative;
+          /* Solid translucent bg instead of backdrop-filter blur — fixes 1s freeze
+             where 5 backdrop-filter cards entering viewport simultaneously
+             cause GPU compositing thrash. Visual diff is minimal on dark bg. */
           background: linear-gradient(135deg,
-            rgba(255,255,255,0.06) 0%,
-            rgba(255,255,255,0.02) 100%);
+            rgba(20, 22, 38, 0.55) 0%,
+            rgba(10, 12, 24, 0.55) 100%);
           border: 1px solid rgba(255,255,255,0.10);
           border-radius: 20px;
           padding: 0;
           overflow: hidden;
-          backdrop-filter: blur(5px) saturate(120%);
-          -webkit-backdrop-filter: blur(5px) saturate(120%);
           box-shadow:
             0 20px 60px rgba(0,0,0,0.4),
             0 0 0 1px rgba(255,255,255,0.04) inset;
-          transition: box-shadow 0.4s;
-          will-change: transform;
+          transition: box-shadow 0.4s, transform 0.3s;
         }
         .card3d:hover {
+          /* will-change only on hover so idle cards don't reserve a GPU layer */
+          will-change: transform;
           box-shadow:
             0 25px 80px rgba(249, 115, 22, 0.35),
             0 0 0 1px rgba(250, 204, 21, 0.25) inset;
@@ -88,8 +90,7 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
         .year-badge {
           position: absolute; top: 14px; right: 14px;
           padding: 0.35rem 0.8rem; border-radius: 999px;
-          background: rgba(0,0,0,0.55);
-          backdrop-filter: blur(5px);
+          background: rgba(0,0,0,0.78);
           color: #facc15; font-weight: 600; font-size: 0.78rem;
           letter-spacing: 0.08em; border: 1px solid rgba(250,204,21,0.3);
         }

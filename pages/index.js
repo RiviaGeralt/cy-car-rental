@@ -2,7 +2,6 @@ import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import Script from 'next/script';
 import styles from '../styles/Home.module.css';
-import InteractiveHero from '../components/InteractiveHero';
 import dynamic from 'next/dynamic';
 import CarCard3D from '../components/CarCard3D';
 import AnimatedStats from '../components/AnimatedStats';
@@ -11,17 +10,14 @@ import { motion } from 'framer-motion';
 
 // HeroCinematic: realistic procedural R3F sedan + drei Lightformer environment
 // + MeshReflectorMaterial floor + scroll-driven cinematic camera orbit.
+// Silent loading state — no "Loading…" text that flashed and looked like a phantom message.
 const Hero3D = dynamic(() => import('../components/HeroCinematic'), {
   ssr: false,
   loading: () => (
     <div style={{
       width: '100%', height: '100vh', minHeight: 640,
-      background: 'transparent',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: '#fde68a', fontSize: '0.85rem', letterSpacing: '0.3em', textTransform: 'uppercase'
-    }}>
-      Loading…
-    </div>
+      background: '#050510',
+    }} aria-hidden="true" />
   )
 });
 
