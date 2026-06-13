@@ -469,7 +469,13 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         .hc-grain {
           position: absolute; inset: 0; pointer-events: none; z-index: 3;
           opacity: 0.055; mix-blend-mode: overlay;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+          /* Noise data URL removed: styled-jsx minifier saw "://" in xmlns
+             and treated "//" as a comment, truncating the data URL and
+             prematurely closing the rule with "}". This dropped EVERY
+             subsequent rule (.hc-fallback through .hc-scroll-line) from
+             the parsed stylesheet. Effect: hero title/chips/CTAs rendered
+             with browser defaults. Sacrificing 5% grain noise to recover
+             the entire hero stylesheet. */
         }
         .hc-fallback {
           position: absolute; inset: 0;
