@@ -33,7 +33,7 @@ const LuxuryBackground = dynamic(() => import('../components/LuxuryBackground'),
 const FORM_ENDPOINT = '/api/submit-form';
 
 // WHATSAPP NUMBER - Business contact
-const WHATSAPP_NUMBER = '+970594198211';
+const WHATSAPP_NUMBER = '+903924440000';
 
 const CARS = [
   { id: 1, name: 'Fiat 500', name_tr: 'Fiat 500', year: 2023, features: ['Bluetooth Audio', 'USB Charging', 'Air Conditioning'], features_tr: ['Bluetooth Ses', 'USB Sarj', 'Klima'], mileage: '12,450 km', fuelTank: '40L', transmission: 'Automatic', description: 'Compact and nimble. Perfect for exploring narrow streets.', description_tr: 'Kompakt ve cevik. Dar sokaklari kesfetmek icin mukemmel.', image: 'https://images.pexels.com/photos/416978/pexels-photo-416978.jpeg' },
@@ -314,18 +314,19 @@ export default function Home() {
         <meta property="og:title" content="Cyprus Road | Premium Car Rental in Cyprus" />
         <meta property="og:description" content="Premium car rental service in Cyprus with luxury and economy options. Book now for 24/7 service." />
         <meta property="og:type" content="business.business" />
-        <meta property="og:url" content="https://cy-car-rental.vercel.app" />
+        <meta property="og:url" content="https://cy-rental-work.vercel.app" />
+        <meta property="og:image" content="https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Cyprus Road Premium Car Rental" />
-        <link rel="canonical" href="https://cy-car-rental.vercel.app" />
+        <link rel="canonical" href="https://cy-rental-work.vercel.app" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "LocalBusiness",
             "name": "Cyprus Road Premium Car Rental",
-            "image": "https://cy-car-rental.vercel.app/logo.png",
+            "image": "https://cy-rental-work.vercel.app/logo.png",
             "description": "Premium car rental service in Cyprus offering luxury and economy vehicles",
-            "url": "https://cy-car-rental.vercel.app",
+            "url": "https://cy-rental-work.vercel.app",
             "telephone": WHATSAPP_NUMBER,
             "areaServed": "CY",
             "priceRange": "$$",
@@ -376,7 +377,7 @@ export default function Home() {
                   English
                 </button>
                 <button className={styles.langModalBtn} onClick={() => handleSelectLanguage('tr')}>
-                  Turkce
+                  Türkçe
                 </button>
               </div>
             </div>
@@ -395,7 +396,7 @@ export default function Home() {
           <button
             className={`${styles.sideLangBtn} ${lang === 'tr' ? styles.active : ''}`}
             onClick={() => setLang('tr')}
-            title="Turkce"
+            title="Türkçe"
           >
             TR
           </button>

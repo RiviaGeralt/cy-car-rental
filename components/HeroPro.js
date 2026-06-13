@@ -472,7 +472,7 @@ const HeroPro = ({ language = 'en', onCTA }) => {
               </MagneticCTA>
               <motion.a
                 className="hp-cta-secondary"
-                href="https://wa.me/970594198211"
+                href="https://wa.me/903924440000"
                 target="_blank" rel="noopener noreferrer"
                 whileHover={{ backgroundColor: 'rgba(255,255,255,0.10)', y: -2 }}
                 whileTap={{ scale: 0.97 }}

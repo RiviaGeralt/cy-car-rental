@@ -91,7 +91,7 @@ const InteractiveHero = ({ language = 'en' }) => {
             </button>
           </div>
           <div className="hero-whatsapp">
-            <a href="https://wa.me/970594198211" target="_blank" rel="noopener noreferrer">
+            <a href="https://wa.me/903924440000" target="_blank" rel="noopener noreferrer">
               <span>💬</span>
               <span>Chat on WhatsApp</span>
             </a>

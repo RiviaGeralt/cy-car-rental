@@ -288,7 +288,7 @@ const itemVariants = {
 function AnimatedTitle({ text }) {
   const chars = useMemo(() => Array.from(text), [text]);
   return (
-    <motion.h1
+    <motion.div
       className="hc-title"
       aria-label={text}
       initial="hidden"
@@ -308,7 +308,7 @@ function AnimatedTitle({ text }) {
           {c === ' ' ? ' ' : c}
         </motion.span>
       ))}
-    </motion.h1>
+    </motion.div>
   );
 }
 
@@ -650,7 +650,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             <motion.div className="hc-cta-row" variants={itemVariants}>
               <MagneticCTA className="hc-cta-primary" onClick={onCTA}>{t.cta} →</MagneticCTA>
               <motion.a className="hc-cta-secondary"
-                href="https://wa.me/970594198211" target="_blank" rel="noopener noreferrer"
+                href="https://wa.me/903924440000" target="_blank" rel="noopener noreferrer"
                 whileHover={{ backgroundColor: 'rgba(255,255,255,0.10)', y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ duration: 0.2 }}>

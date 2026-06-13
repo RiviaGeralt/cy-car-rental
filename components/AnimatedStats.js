@@ -1,27 +1,28 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion';
 
-const Counter = ({ to, suffix = '', duration = 1.8 }) => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
+const Counter = ({ to, suffix = '', duration = 1.8, start = false }) => {
   const mv = useMotionValue(0);
   const rounded = useTransform(mv, (v) => Math.floor(v).toLocaleString());
 
   useEffect(() => {
-    if (inView) {
+    if (start) {
       const ctrl = animate(mv, to, { duration, ease: [0.2, 0.8, 0.2, 1] });
       return ctrl.stop;
     }
-  }, [inView, to, duration, mv]);
+  }, [start, to, duration, mv]);
 
   return (
-    <span ref={ref}>
+    <span>
       <motion.span>{rounded}</motion.span>{suffix}
     </span>
   );
 };
 
 const AnimatedStats = ({ language = 'en' }) => {
+  const sectionRef = useRef(null);
+  const sectionInView = useInView(sectionRef, { once: true, amount: 0.2 });
+
   const stats = language === 'tr' ? [
     { v: 500, s: '+', label: 'Mutlu Müşteri' },
     { v: 5, s: '', label: 'Premium Araç' },
@@ -35,7 +36,7 @@ const AnimatedStats = ({ language = 'en' }) => {
   ];
 
   return (
-    <section className="stats-band">
+    <section className="stats-band" ref={sectionRef}>
       <style jsx>{`
         .stats-band {
           padding: 6rem 1.5rem;
@@ -79,7 +80,7 @@ const AnimatedStats = ({ language = 'en' }) => {
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.6, delay: i * 0.1 }}
           >
-            <div className="num"><Counter to={st.v} suffix={st.s} /></div>
+            <div className="num"><Counter to={st.v} suffix={st.s} start={sectionInView} /></div>
             <div className="label">{st.label}</div>
           </motion.div>
         ))}

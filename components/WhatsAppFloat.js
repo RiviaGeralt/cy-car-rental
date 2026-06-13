@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const WHATSAPP_NUMBER = '+970594198211';
+const WHATSAPP_NUMBER = '+903924440000';
 
 const WhatsAppFloat = ({ language = 'en' }) => {
   const [visible, setVisible] = useState(false);
