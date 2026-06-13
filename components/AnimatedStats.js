@@ -37,7 +37,9 @@ const AnimatedStats = ({ language = 'en' }) => {
 
   return (
     <section className="stats-band" ref={sectionRef}>
-      <style jsx>{`
+      {/* global: motion.div.stat doesn't receive scope class → numbers
+          would render with browser defaults instead of gradient/clamp sizing. */}
+      <style jsx global>{`
         .stats-band {
           padding: 6rem 1.5rem;
           background:

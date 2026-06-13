@@ -41,7 +41,9 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
       transition={{ duration: 0.7, delay: index * 0.08, ease: [0.2, 0.8, 0.2, 1] }}
       className="card3d"
     >
-      <style jsx>{`
+      {/* global: outer motion.div doesn't receive styled-jsx scope class —
+          .card3d would otherwise be unstyled (no bg, no border, no shadow). */}
+      <style jsx global>{`
         .card3d {
           position: relative;
           /* Solid translucent bg instead of backdrop-filter blur — fixes 1s freeze
