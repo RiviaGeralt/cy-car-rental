@@ -404,7 +404,11 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         background: '#050510',
       }}
     >
-      <style jsx>{`
+      {/* `global` because styled-jsx's Babel scope class doesn't propagate
+          to <motion.div className="..."> (custom component). Without global,
+          .hc-eyebrow / .hc-title / .hc-chips / .hc-cta-* lost their styles
+          while the framer-motion stagger animation hid this from us. */}
+      <style jsx global>{`
         .hc-wrap {
           position: relative;
           width: 100%;
