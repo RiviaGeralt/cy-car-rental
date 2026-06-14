@@ -121,6 +121,13 @@
   .aurora1 { opacity: 0.45; filter: blur(40px); }
   .aurora2 { opacity: 0.38; filter: blur(50px); }
   .aurora3 { opacity: 0.30; filter: blur(55px); }
+  .auroraLayer {
+    mix-blend-mode: normal;
+    will-change: auto;
+  }
+  .aurora1 { opacity: 0.60; filter: blur(35px); }
+  .aurora2 { opacity: 0.50; filter: blur(45px); }
+  .aurora3 { opacity: 0.40; filter: blur(50px); }
   /* Even softer vignette on mobile — fixed vignette + small viewport meant
      more of every section sat in the dimmed corner zone. */
   .vignette {

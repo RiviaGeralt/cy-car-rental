@@ -151,12 +151,18 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
           }
           .year-badge { backdrop-filter: none; }
         }
+        @media (max-width: 768px) {
+          .card3d {
+            content-visibility: auto;
+            contain-intrinsic-size: 0 420px;
+          }
+        }
       `}</style>
 
       <div className="glow" />
 
       <div className="img-wrap">
-        <img src={car.image} alt={name} loading={index < 2 ? 'eager' : 'lazy'} decoding={index < 2 ? 'sync' : 'async'} />
+        <img src={car.image} alt={name} loading={index < 2 ? 'eager' : 'lazy'} decoding={index < 2 ? 'sync' : 'async'} fetchPriority={index < 2 ? 'high' : 'auto'} />
         <div className="img-overlay" />
         <div className="year-badge">{car.year}</div>
       </div>

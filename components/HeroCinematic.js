@@ -285,8 +285,11 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.2, 0.8, 0.2, 1] } },
 };
 
-function AnimatedTitle({ text }) {
+function AnimatedTitle({ text, isMobile }) {
   const chars = useMemo(() => Array.from(text), [text]);
+  if (isMobile) {
+    return <div className="hc-title" aria-label={text}>{text}</div>;
+  }
   return (
     <motion.div
       className="hc-title"
@@ -479,9 +482,9 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         }
         .hc-fallback {
           position: absolute; inset: 0;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 10rem; opacity: 0.4; color: #facc15; pointer-events: none;
-          filter: drop-shadow(0 0 50px rgba(249,115,22,0.4)); z-index: 1;
+          z-index: 1;
+          pointer-events: none;
+          overflow: hidden;
         }
         .hc-content {
           position: absolute; inset: 0;
@@ -566,11 +569,13 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             justify-content: center;
             padding: 2rem 1.5rem 5rem;
           }
+          .hc-title { white-space: nowrap; font-size: clamp(2rem, 8vw, 3.5rem); }
           /* Stronger aurora on mobile since no 3D car */
-          .hc-bg::before { opacity: 1 !important; }
-          .hc-bg::after { opacity: 0.9 !important; }
+          .hc-bg::before { opacity: 1 !important; transform: scale(1.4); }
+          .hc-bg::after { opacity: 0.95 !important; transform: scale(1.3); }
         }
         @media (max-width: 480px) {
+          .hc-title { font-size: clamp(1.8rem, 7.5vw, 3rem); white-space: nowrap; }
           .hc-chips { gap: 0.4rem; margin-bottom: 1.6rem; }
           .hc-chip { padding: 0.4rem 0.7rem; font-size: 0.78rem; }
           .hc-cta-row { flex-direction: column; width: 100%; padding: 0 1rem; }
@@ -657,7 +662,19 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
       ) : null /* mobile: CSS aurora hero only — smooth, no WebGL */}
 
       {supports3D === false && (
-        <div className="hc-fallback" aria-hidden="true">🚗</div>
+        <div className="hc-fallback" aria-hidden="true">
+          <img
+            src="https://images.pexels.com/photos/3729464/pexels-photo-3729464.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop"
+            alt=""
+            style={{
+              position: 'absolute', inset: 0,
+              width: '100%', height: '100%',
+              objectFit: 'cover',
+              opacity: 0.25,
+              filter: 'blur(2px) saturate(0.7)',
+            }}
+          />
+        </div>
       )}
 
       {/* Layer 2 — vignette overlay */}
@@ -680,7 +697,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         key={`lang-${language}`}
       >
         <motion.div className="hc-eyebrow" variants={itemVariants}>{t.eyebrow}</motion.div>
-        <AnimatedTitle text={t.title} />
+        <AnimatedTitle text={t.title} isMobile={supports3D === false} />
         <motion.p className="hc-sub" variants={itemVariants}>{t.sub}</motion.p>
         <motion.div className="hc-chips" variants={itemVariants} style={{ pointerEvents: 'auto' }}>
           {[t.chip1, t.chip2, t.chip3].map((c, i) => (

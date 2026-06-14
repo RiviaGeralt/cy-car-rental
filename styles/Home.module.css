@@ -1648,8 +1648,65 @@
   .hero,
   .sideLangSwitcher,
   .header,
-  .footer {
+  .footer,
+  .langModalPopup,
+  .modalContent,
+  .ctaButtonSecondary {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
+}
+
+/* ===== MOBILE TEXT VISIBILITY FIXES (2026-06-14) ===== */
+
+/* heroText h2: was gradient-clip (invisible on mobile). Solid white. */
+.heroText h2 {
+  color: #ffffff !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+}
+
+/* heroText p: was #d0d8e0 (low contrast on dark bg) */
+.heroText p {
+  color: rgba(255,255,255,0.90) !important;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+}
+
+/* header .title: was cyan gradient-clip (invisible on dark bg) */
+.title {
+  color: #ffffff !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.7);
+}
+
+/* subtitle: was #d0d8e0, too dim */
+.subtitle {
+  color: rgba(255,255,255,0.88) !important;
+}
+
+/* benefit descriptions and testimonial quotes: increase contrast */
+.benefitDescription {
+  color: rgba(255,255,255,0.85) !important;
+}
+.testimonialQuote {
+  color: rgba(255,255,255,0.88) !important;
+  font-style: normal !important;
+}
+.testimonialName {
+  color: #ffffff !important;
+}
+
+/* pricingHighlight: was gradient-clip (may be invisible) */
+.pricingHighlight {
+  color: #facc15 !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: #facc15 !important;
 }
