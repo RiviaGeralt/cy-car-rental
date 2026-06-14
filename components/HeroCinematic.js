@@ -570,6 +570,17 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             padding: 2rem 1.5rem 5rem;
           }
           .hc-title { white-space: nowrap; font-size: clamp(2rem, 8vw, 3.5rem); }
+          /* background-clip:text + perspective + filter = invisible on mobile Safari.
+             Guaranteed-visible solid white — gradient is a desktop luxury. */
+          .hc-title {
+            -webkit-text-fill-color: #ffffff !important;
+            color: #ffffff !important;
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            background-clip: unset !important;
+            filter: none !important;
+            perspective: none;
+          }
           /* Stronger aurora on mobile since no 3D car */
           .hc-bg::before { opacity: 1 !important; transform: scale(1.4); }
           .hc-bg::after { opacity: 0.95 !important; transform: scale(1.3); }
@@ -662,16 +673,18 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
       ) : null /* mobile: CSS aurora hero only — smooth, no WebGL */}
 
       {supports3D === false && (
-        <div className="hc-fallback" aria-hidden="true">
+        /* hc-fallback has no opacity itself — img opacity is sole control */
+        <div className="hc-fallback" aria-hidden="true" style={{ opacity: 1 }}>
           <img
-            src="https://images.pexels.com/photos/3729464/pexels-photo-3729464.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop"
+            src="https://images.pexels.com/photos/3729464/pexels-photo-3729464.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop&h=600"
             alt=""
+            loading="eager"
             style={{
               position: 'absolute', inset: 0,
               width: '100%', height: '100%',
-              objectFit: 'cover',
-              opacity: 0.25,
-              filter: 'blur(2px) saturate(0.7)',
+              objectFit: 'cover', objectPosition: 'center 40%',
+              opacity: 0.30,
+              filter: 'blur(2px) saturate(1.3)',
             }}
           />
         </div>

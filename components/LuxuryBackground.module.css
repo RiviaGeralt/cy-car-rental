@@ -114,22 +114,37 @@
   .aurora1, .aurora2, .aurora3 { animation: none; }
 }
 
-/* ─── Mobile: canvas off, promote aurora ────────────────────────────────── */
+/* ─── Mobile: canvas off, aurora fully visible + no lag ─────────────────
+   Previous state had 3 bugs:
+   1. Duplicate aurora rules (conflicting commits) — cleaned up
+   2. filter:blur(35-55px) = #1 GPU lag source on mobile — REMOVED
+   3. Conic-gradient needs blur to look soft → replaced with radial-gradient
+   mix-blend-mode:normal already correct from prior commit.
+─────────────────────────────────────────────────────────────────────────── */
 
 @media (pointer: coarse) {
   .canvas { display: none; }
-  .aurora1 { opacity: 0.45; filter: blur(40px); }
-  .aurora2 { opacity: 0.38; filter: blur(50px); }
-  .aurora3 { opacity: 0.30; filter: blur(55px); }
+
   .auroraLayer {
     mix-blend-mode: normal;
-    will-change: auto;
+    filter: none;       /* kill GPU blur — biggest mobile perf win */
+    will-change: transform;
   }
-  .aurora1 { opacity: 0.60; filter: blur(35px); }
-  .aurora2 { opacity: 0.50; filter: blur(45px); }
-  .aurora3 { opacity: 0.40; filter: blur(50px); }
-  /* Even softer vignette on mobile — fixed vignette + small viewport meant
-     more of every section sat in the dimmed corner zone. */
+
+  /* Radial-gradient is naturally soft without any blur */
+  .aurora1 {
+    background: radial-gradient(ellipse 90% 70% at 30% 35%, rgba(109,40,217,0.60), transparent 70%);
+    opacity: 0.75;
+  }
+  .aurora2 {
+    background: radial-gradient(ellipse 80% 65% at 72% 30%, rgba(212,175,55,0.50), transparent 70%);
+    opacity: 0.65;
+  }
+  .aurora3 {
+    background: radial-gradient(ellipse 70% 60% at 55% 65%, rgba(109,40,217,0.40), transparent 70%);
+    opacity: 0.55;
+  }
+
   .vignette {
     background: radial-gradient(
       ellipse 130% 110% at 50% 50%,
@@ -137,10 +152,11 @@
       rgba(0, 0, 0, 0.18) 100%
     );
   }
+
   .root {
     background: radial-gradient(
       ellipse at 50% 100%,
-      rgba(212, 175, 55, 0.07) 0%,
+      rgba(212, 175, 55, 0.10) 0%,
       #050510 60%
     );
   }
