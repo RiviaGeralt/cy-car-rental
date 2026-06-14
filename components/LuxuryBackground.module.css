@@ -118,9 +118,9 @@
 
 @media (pointer: coarse) {
   .canvas { display: none; }
-  .aurora1 { opacity: 0.18; }
-  .aurora2 { opacity: 0.15; }
-  .aurora3 { opacity: 0.12; }
+  .aurora1 { opacity: 0.45; filter: blur(40px); }
+  .aurora2 { opacity: 0.38; filter: blur(50px); }
+  .aurora3 { opacity: 0.30; filter: blur(55px); }
   /* Even softer vignette on mobile — fixed vignette + small viewport meant
      more of every section sat in the dimmed corner zone. */
   .vignette {

@@ -562,11 +562,13 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         }
         @media (max-width: 768px) {
           .hc-wrap { height: 100svh; min-height: 600px; }
-          /* No 3D car on mobile → center content vertically */
           .hc-content {
             justify-content: center;
-            padding: 1.5rem 1.5rem 5rem;
+            padding: 2rem 1.5rem 5rem;
           }
+          /* Stronger aurora on mobile since no 3D car */
+          .hc-bg::before { opacity: 1 !important; }
+          .hc-bg::after { opacity: 0.9 !important; }
         }
         @media (max-width: 480px) {
           .hc-chips { gap: 0.4rem; margin-bottom: 1.6rem; }
@@ -654,6 +656,10 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         </div>
       ) : null /* mobile: CSS aurora hero only — smooth, no WebGL */}
 
+      {supports3D === false && (
+        <div className="hc-fallback" aria-hidden="true">🚗</div>
+      )}
+
       {/* Layer 2 — vignette overlay */}
       <div className="hc-vignette" />
       {/* Layer 3 — film grain */}
@@ -667,16 +673,6 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         style={{
           y: yContent,
           opacity: opacityContent,
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          textAlign: 'center',
-          padding: 'clamp(2rem, 8vh, 5rem) 2rem 0',
-          zIndex: 5,
-          pointerEvents: 'none',
         }}
         variants={containerVariants}
         initial="hidden"

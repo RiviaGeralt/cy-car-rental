@@ -57,9 +57,7 @@ const AnimatedStats = ({ language = 'en' }) => {
         .num {
           font-size: clamp(2.5rem, 6vw, 4.5rem);
           font-weight: 800;
-          background: linear-gradient(180deg, #fff, #facc15);
-          -webkit-background-clip: text; background-clip: text;
-          -webkit-text-fill-color: transparent;
+          color: #facc15;
           line-height: 1; margin-bottom: 0.6rem;
           letter-spacing: -0.03em;
         }
@@ -71,6 +69,7 @@ const AnimatedStats = ({ language = 'en' }) => {
         @media (max-width: 768px) {
           .grid { grid-template-columns: repeat(2, 1fr); gap: 2.5rem 1.5rem; }
           .stats-band { padding: 4rem 1.5rem; }
+          .label { color: rgba(255,255,255,0.75); }
         }
       `}</style>
       <div className="grid">

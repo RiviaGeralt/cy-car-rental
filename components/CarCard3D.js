@@ -156,7 +156,7 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
       <div className="glow" />
 
       <div className="img-wrap">
-        <img src={car.image} alt={name} loading="lazy" />
+        <img src={car.image} alt={name} loading={index < 2 ? 'eager' : 'lazy'} decoding={index < 2 ? 'sync' : 'async'} />
         <div className="img-overlay" />
         <div className="year-badge">{car.year}</div>
       </div>
