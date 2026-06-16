@@ -1292,6 +1292,21 @@
     font-size: 24px;
   }
 
+  /* Cards: remove backdrop-filter on mobile (blurs dark bg → invisible), use solid tint */
+  .benefitCard {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .testimonialCard {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+
   .benefitsGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
