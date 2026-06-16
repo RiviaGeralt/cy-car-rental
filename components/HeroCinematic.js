@@ -350,6 +350,13 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
   // null = not yet detected (prevents flash on mobile)
   const [supports3D, setSupports3D] = useState(null);
   const wrapRef = useRef(null);
+  // Safe: dynamic import (ssr:false) guarantees window exists on first render.
+  // Detect mobile NOW so initial="hidden" is skipped — prevents items staying at opacity:0
+  // if Framer Motion stagger animation doesn't fire before user sees the screen.
+  const isMobileOnInit = useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches,
+    []
+  );
 
   const { scrollY } = useScroll();
   // Mobile back-forward cache can restore scrollY > 200 on mount → hero invisible.
@@ -695,7 +702,10 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
 
       {/* Layer 5 — UI content. Inline critical layout prevents FOUC where
           style-jsx hasn't applied yet and content collapses to top-left.
-          AnimatePresence removed: it was causing a flash on every language change. */}
+          AnimatePresence removed: it was causing a flash on every language change.
+          initial={false} on mobile: skip hidden→show stagger so content is
+          visible immediately — stagger animation was leaving items at opacity:0
+          if Framer Motion didn't fire before user looked at the screen. */}
       <motion.div
         className="hc-content"
         style={{
@@ -703,7 +713,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
           opacity: opacityContent,
         }}
         variants={containerVariants}
-        initial="hidden"
+        initial={isMobileOnInit ? false : 'hidden'}
         animate="show"
         key={`lang-${language}`}
       >

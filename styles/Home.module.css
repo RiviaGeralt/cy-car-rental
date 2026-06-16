@@ -786,6 +786,7 @@
   padding: 40px;
   border-radius: 16px;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition: all 0.4s ease;
 }
 
