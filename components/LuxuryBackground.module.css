@@ -146,4 +146,7 @@
   }
 
   .root { background: #050510; }
+
+  /* Tone down road on mobile — sections are transparent, sparse layout exposes canvas */
+  .canvas { opacity: 0.45; }
 }

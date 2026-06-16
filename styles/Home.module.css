@@ -1263,6 +1263,11 @@
 @media (max-width: 768px) {
   .testimonials {
     padding: 40px 20px;
+    background: rgba(5, 5, 16, 0.82) !important;
+  }
+
+  .testimonialsHeader {
+    margin-bottom: 20px;
   }
 
   .testimonialsHeader h2 {
@@ -1276,6 +1281,11 @@
 
   .benefits {
     padding: 40px 20px;
+    background: rgba(5, 5, 16, 0.82) !important;
+  }
+
+  .benefitsHeader {
+    margin-bottom: 20px;
   }
 
   .benefitsHeader h2 {
