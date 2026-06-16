@@ -1262,7 +1262,7 @@
 /* Testimonials & Benefits Mobile Responsive */
 @media (max-width: 768px) {
   .testimonials {
-    padding: 40px 20px;
+    padding: 40px 20px !important;
     background: rgba(5, 5, 16, 0.82) !important;
   }
 
@@ -1280,7 +1280,7 @@
   }
 
   .benefits {
-    padding: 40px 20px;
+    padding: 40px 20px !important;
     background: rgba(5, 5, 16, 0.82) !important;
   }
 
