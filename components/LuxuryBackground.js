@@ -25,10 +25,10 @@ export default function LuxuryBackground() {
 
     let intersectionObs = null;
 
-    if (!isMobile && canvasRef.current) {
+    if (canvasRef.current) {
       import('./canvas/NightDriveCanvas.js').then(({ NightDriveCanvas }) => {
         if (!canvasRef.current) return;
-        const engine = new NightDriveCanvas(canvasRef.current, false);
+        const engine = new NightDriveCanvas(canvasRef.current, isMobile);
         engineRef.current = engine;
         engine.start();
 
@@ -47,19 +47,17 @@ export default function LuxuryBackground() {
       });
     }
 
-    // Read scroll every RAF tick — desktop only, not needed on mobile (no canvas engine)
+    // Read scroll every RAF tick — drives NightDriveCanvas scene params on both desktop and mobile
     let readScroll = null;
-    if (!isMobile) {
-      readScroll = () => {
-        if (engineRef.current) {
-          const maxScroll = document.body.scrollHeight - window.innerHeight;
-          const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
-          engineRef.current.setScrollProgress(progress);
-        }
-        scrollRafRef.current = requestAnimationFrame(readScroll);
-      };
+    readScroll = () => {
+      if (engineRef.current) {
+        const maxScroll = document.body.scrollHeight - window.innerHeight;
+        const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+        engineRef.current.setScrollProgress(progress);
+      }
       scrollRafRef.current = requestAnimationFrame(readScroll);
-    }
+    };
+    scrollRafRef.current = requestAnimationFrame(readScroll);
 
     // Resize (debounced)
     let resizeTimer;

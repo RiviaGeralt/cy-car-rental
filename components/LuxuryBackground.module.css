@@ -122,7 +122,8 @@
 ─────────────────────────────────────────────────────────────────────────── */
 
 @media (pointer: coarse) {
-  .canvas { display: none; }
+  /* canvas ENABLED on mobile — NightDriveCanvas runs at 30fps/12 particles (mobile mode)
+     same road animation as desktop. Canvas provides the main visual; aurora is accent. */
 
   .auroraLayer {
     mix-blend-mode: screen;  /* same as desktop — additive on dark bg */
@@ -131,9 +132,10 @@
     inset: -10%;             /* smaller than desktop -25% — avoids clip edge issues */
   }
 
-  .aurora1 { opacity: 0.40; }
-  .aurora2 { opacity: 0.32; }
-  .aurora3 { opacity: 0.26; }
+  /* Reduced vs previous — canvas is now the primary background, aurora is subtle accent */
+  .aurora1 { opacity: 0.20; }
+  .aurora2 { opacity: 0.16; }
+  .aurora3 { opacity: 0.13; }
 
   .vignette {
     background: radial-gradient(

@@ -684,23 +684,9 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         </div>
       ) : null /* mobile: CSS aurora hero only — smooth, no WebGL */}
 
-      {supports3D === false && (
-        /* hc-fallback has no opacity itself — img opacity is sole control */
-        <div className="hc-fallback" aria-hidden="true" style={{ opacity: 1 }}>
-          <img
-            src="https://images.pexels.com/photos/3729464/pexels-photo-3729464.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop&h=600"
-            alt=""
-            loading="eager"
-            style={{
-              position: 'absolute', inset: 0,
-              width: '100%', height: '100%',
-              objectFit: 'cover', objectPosition: 'center 40%',
-              opacity: 0.45,
-              filter: 'saturate(1.1)',
-            }}
-          />
-        </div>
-      )}
+      {/* mobile: CSS aurora (hc-bg) handles background — no static photo.
+          Outdoor daytime photo was the #1 reason mobile ≠ desktop.
+          Dark CSS aurora matches the desktop dark-studio aesthetic. */}
 
       {/* Layer 2 — vignette overlay */}
       <div className="hc-vignette" />
