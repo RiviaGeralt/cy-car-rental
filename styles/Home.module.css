@@ -1464,7 +1464,7 @@
 .benefits,
 .cta,
 .footer {
-  background: transparent !important;
+  background: transparent;
   color: #f5f5f5;
 }
 
@@ -1508,7 +1508,7 @@
 
 .testimonials {
   padding: 7rem 1.5rem;
-  background: transparent !important;
+  background: transparent;
 }
 .testimonialCard {
   background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)) !important;
@@ -1529,7 +1529,7 @@
 
 .benefits {
   padding: 7rem 1.5rem;
-  background: transparent !important;
+  background: transparent;
 }
 .benefitCard {
   background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) !important;
