@@ -34,7 +34,7 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
       ref={ref}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
-      style={isMobile ? {} : { rotateX: rotX, rotateY: rotY, transformStyle: 'preserve-3d', perspective: 1000 }}
+      style={isMobile ? {} : { rotateX: rotX, rotateY: rotY, perspective: 1000 }}
       initial={{ opacity: 0, y: 60 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
@@ -78,7 +78,7 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
         .card3d:hover .glow { opacity: 1; }
         .img-wrap {
           position: relative; aspect-ratio: 16/10;
-          overflow: hidden; transform: translateZ(40px);
+          overflow: hidden;
         }
         .img-wrap img {
           width: 100%; height: 100%; object-fit: cover;
@@ -98,7 +98,6 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
         }
         .body {
           padding: 1.6rem 1.4rem 1.4rem;
-          transform: translateZ(30px);
         }
         .name {
           font-size: 1.5rem; font-weight: 700; color: #fff;

@@ -506,8 +506,12 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
           background: linear-gradient(180deg, #ffffff 0%, #fde68a 55%, #f97316 100%);
           -webkit-background-clip: text; background-clip: text;
           -webkit-text-fill-color: transparent;
-          filter: drop-shadow(0 10px 30px rgba(249,115,22,0.35));
+          /* drop-shadow removed: filter on gradient-clipped text causes blurry rasterization
+             on iOS Safari and some Android Chrome builds. Glow handled by wrapper below. */
           perspective: 800px;
+        }
+        .hc-title-wrap {
+          filter: drop-shadow(0 8px 28px rgba(249,115,22,0.30));
         }
         .hc-sub {
           font-size: clamp(1rem, 2vw, 1.3rem);
@@ -570,8 +574,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             padding: 2rem 1.5rem 5rem;
           }
           .hc-title { white-space: nowrap; font-size: clamp(2rem, 8vw, 3.5rem); }
-          /* background-clip:text + perspective + filter = invisible on mobile Safari.
-             Guaranteed-visible solid white — gradient is a desktop luxury. */
+          /* background-clip:text is invisible on mobile Safari — override with solid white */
           .hc-title {
             -webkit-text-fill-color: #ffffff !important;
             color: #ffffff !important;
@@ -581,9 +584,18 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             filter: none !important;
             perspective: none;
           }
-          /* Stronger aurora on mobile since no 3D car */
-          .hc-bg::before { opacity: 1 !important; transform: scale(1.4); }
-          .hc-bg::after { opacity: 0.95 !important; transform: scale(1.3); }
+          /* Stronger aurora on mobile since no 3D car.
+             !important removed — froze animation opacity on iOS/Android. */
+          .hc-bg::before { animation: hcAurora1Mobile 11s ease-in-out infinite alternate; }
+          .hc-bg::after  { animation: hcAurora2Mobile 16s ease-in-out infinite alternate-reverse; }
+        }
+        @keyframes hcAurora1Mobile {
+          0%   { opacity: 0.85; transform: scale(1.2) translateX(0) translateY(0); }
+          100% { opacity: 1;    transform: scale(1.32) translateX(2%) translateY(-1%); }
+        }
+        @keyframes hcAurora2Mobile {
+          0%   { opacity: 0.75; transform: scale(1.15) translateX(0); }
+          100% { opacity: 0.95; transform: scale(1.28) translateX(-3%) translateY(2%); }
         }
         @media (max-width: 480px) {
           .hc-title { font-size: clamp(1.8rem, 7.5vw, 3rem); white-space: nowrap; }
@@ -683,8 +695,8 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
               position: 'absolute', inset: 0,
               width: '100%', height: '100%',
               objectFit: 'cover', objectPosition: 'center 40%',
-              opacity: 0.30,
-              filter: 'blur(2px) saturate(1.3)',
+              opacity: 0.45,
+              filter: 'saturate(1.1)',
             }}
           />
         </div>
@@ -710,7 +722,9 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         key={`lang-${language}`}
       >
         <motion.div className="hc-eyebrow" variants={itemVariants}>{t.eyebrow}</motion.div>
-        <AnimatedTitle text={t.title} isMobile={supports3D === false} />
+        <div className="hc-title-wrap">
+          <AnimatedTitle text={t.title} isMobile={supports3D === false} />
+        </div>
         <motion.p className="hc-sub" variants={itemVariants}>{t.sub}</motion.p>
         <motion.div className="hc-chips" variants={itemVariants} style={{ pointerEvents: 'auto' }}>
           {[t.chip1, t.chip2, t.chip3].map((c, i) => (

@@ -19,8 +19,9 @@ export default function LuxuryBackground() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const isMobile = window.matchMedia('(pointer: coarse)').matches
-      || (navigator.hardwareConcurrency != null && navigator.hardwareConcurrency <= 2);
+    // pointer:coarse is the only reliable mobile signal.
+    // hardwareConcurrency is capped at 2 by Firefox (privacy) — falsely disables canvas on desktop.
+    const isMobile = window.matchMedia('(pointer: coarse)').matches;
 
     let intersectionObs = null;
 
