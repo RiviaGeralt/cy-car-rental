@@ -1657,56 +1657,78 @@
   }
 }
 
-/* ===== MOBILE TEXT VISIBILITY FIXES (2026-06-14) ===== */
+/* ===== MOBILE TEXT VISIBILITY FIXES — scoped to max-width:768px ===== */
+/* Previously these were GLOBAL (no media query) — overrode desktop gradient text. Fixed. */
 
-/* heroText h2: was gradient-clip (invisible on mobile). Solid white. */
-.heroText h2 {
-  color: #ffffff !important;
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
-  -webkit-text-fill-color: #ffffff !important;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
-}
+@media (max-width: 768px) {
+  /* heroText h2: gradient-clip invisible on mobile */
+  .heroText h2 {
+    color: #ffffff !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: #ffffff !important;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+  }
 
-/* heroText p: was #d0d8e0 (low contrast on dark bg) */
-.heroText p {
-  color: rgba(255,255,255,0.90) !important;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.6);
-}
+  .heroText p {
+    color: rgba(255,255,255,0.90) !important;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+  }
 
-/* header .title: was cyan gradient-clip (invisible on dark bg) */
-.title {
-  color: #ffffff !important;
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
-  -webkit-text-fill-color: #ffffff !important;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.7);
-}
+  /* header title: cyan gradient-clip → solid white */
+  .title {
+    color: #ffffff !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: #ffffff !important;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.7);
+  }
 
-/* subtitle: was #d0d8e0, too dim */
-.subtitle {
-  color: rgba(255,255,255,0.88) !important;
-}
+  .subtitle {
+    color: rgba(255,255,255,0.88) !important;
+  }
 
-/* benefit descriptions and testimonial quotes: increase contrast */
-.benefitDescription {
-  color: rgba(255,255,255,0.85) !important;
-}
-.testimonialQuote {
-  color: rgba(255,255,255,0.88) !important;
-  font-style: normal !important;
-}
-.testimonialName {
-  color: #ffffff !important;
-}
+  /* Section headings (fleet/testimonials/benefits) — gradient-clip → solid */
+  .fleetHeader h2,
+  .testimonialsHeader h2,
+  .benefitsHeader h2 {
+    color: #ffffff !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
 
-/* pricingHighlight: was gradient-clip (may be invisible) */
-.pricingHighlight {
-  color: #facc15 !important;
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
-  -webkit-text-fill-color: #facc15 !important;
+  .fleetHeader p,
+  .testimonialsHeader p {
+    color: rgba(255,255,255,0.80) !important;
+  }
+
+  /* Card body text */
+  .benefitDescription {
+    color: rgba(255,255,255,0.85) !important;
+  }
+  .testimonialQuote {
+    color: rgba(255,255,255,0.88) !important;
+    font-style: normal !important;
+  }
+  .testimonialName {
+    color: #ffffff !important;
+  }
+  .testimonialLocation {
+    color: rgba(255,255,255,0.65) !important;
+  }
+  .benefitHeadline {
+    color: #ffffff !important;
+  }
+
+  .pricingHighlight {
+    color: #facc15 !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: #facc15 !important;
+  }
 }

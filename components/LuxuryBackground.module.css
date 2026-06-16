@@ -114,36 +114,26 @@
   .aurora1, .aurora2, .aurora3 { animation: none; }
 }
 
-/* ─── Mobile: canvas off, aurora fully visible + no lag ─────────────────
-   Previous state had 3 bugs:
-   1. Duplicate aurora rules (conflicting commits) — cleaned up
-   2. filter:blur(35-55px) = #1 GPU lag source on mobile — REMOVED
-   3. Conic-gradient needs blur to look soft → replaced with radial-gradient
-   mix-blend-mode:normal already correct from prior commit.
+/* ─── Mobile: canvas off, aurora matches desktop feel (dark + subtle) ───────
+   PROBLEM: mix-blend-mode:normal at 0.75 opacity = vivid purple everywhere.
+   Desktop uses mix-blend-mode:screen at 0.08 on dark canvas = barely visible.
+   FIX: screen blend at moderate opacity → dark background, subtle color accents.
+   Screen formula on #050510: result ≈ aurora × 0.35 additive on near-black → subtle.
 ─────────────────────────────────────────────────────────────────────────── */
 
 @media (pointer: coarse) {
   .canvas { display: none; }
 
   .auroraLayer {
-    mix-blend-mode: normal;
-    filter: none;       /* kill GPU blur — biggest mobile perf win */
-    will-change: transform;
+    mix-blend-mode: screen;  /* same as desktop — additive on dark bg */
+    filter: none;            /* no GPU blur */
+    will-change: auto;       /* no GPU layer reservation on mobile */
+    inset: -10%;             /* smaller than desktop -25% — avoids clip edge issues */
   }
 
-  /* Radial-gradient is naturally soft without any blur */
-  .aurora1 {
-    background: radial-gradient(ellipse 90% 70% at 30% 35%, rgba(109,40,217,0.60), transparent 70%);
-    opacity: 0.75;
-  }
-  .aurora2 {
-    background: radial-gradient(ellipse 80% 65% at 72% 30%, rgba(212,175,55,0.50), transparent 70%);
-    opacity: 0.65;
-  }
-  .aurora3 {
-    background: radial-gradient(ellipse 70% 60% at 55% 65%, rgba(109,40,217,0.40), transparent 70%);
-    opacity: 0.55;
-  }
+  .aurora1 { opacity: 0.40; }
+  .aurora2 { opacity: 0.32; }
+  .aurora3 { opacity: 0.26; }
 
   .vignette {
     background: radial-gradient(
@@ -153,11 +143,5 @@
     );
   }
 
-  .root {
-    background: radial-gradient(
-      ellipse at 50% 100%,
-      rgba(212, 175, 55, 0.10) 0%,
-      #050510 60%
-    );
-  }
+  .root { background: #050510; }
 }
