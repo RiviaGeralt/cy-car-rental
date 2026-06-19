@@ -433,17 +433,8 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         /* ── Animated CSS background — always visible, GPU-only transforms ── */
         .hc-bg {
           position: absolute; inset: 0; z-index: 0;
-          background: rgba(5,5,16,0.72);
+          background: #050510;
           overflow: hidden;
-        }
-        .hc-video-bg {
-          position: absolute; inset: 0; z-index: 0;
-          width: 100%; height: 100%; object-fit: cover;
-          opacity: 0.32;
-          pointer-events: none;
-        }
-        @media (max-width: 768px) {
-          .hc-video-bg { opacity: 0.18; }
         }
         .hc-bg::before {
           content: '';
@@ -622,19 +613,6 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
         }
       `}</style>
 
-      {/* Video background — Higgsfield Veo3 Cyprus coastal aerial */}
-      <video
-        className="hc-video-bg"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="none"
-        aria-hidden="true"
-      >
-        <source src="/videos/hero-higgsfield.mp4" type="video/mp4" />
-      </video>
-
       {/* Layer 0 — CSS animated aurora background (always visible).
           Inline gradient + dark bg are FOUC fallback for mobile where
           styled-jsx ::before/::after animations sometimes don't apply
@@ -649,7 +627,7 @@ const HeroCinematic = ({ language = 'en', onCTA }) => {
             'radial-gradient(ellipse 90% 65% at 40% -5%, rgba(124,58,237,0.35), transparent 65%),' +
             'radial-gradient(ellipse 75% 55% at 88% 65%, rgba(249,115,22,0.25), transparent 65%),' +
             'radial-gradient(ellipse 60% 50% at 15% 80%, rgba(167,139,250,0.18), transparent 65%),' +
-            'linear-gradient(rgba(5,5,16,0.72), rgba(5,5,16,0.72))',
+            '#050510',
           overflow: 'hidden',
         }}
       />
