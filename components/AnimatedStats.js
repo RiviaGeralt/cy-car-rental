@@ -57,7 +57,10 @@ const AnimatedStats = ({ language = 'en' }) => {
         .num {
           font-size: clamp(2.5rem, 6vw, 4.5rem);
           font-weight: 800;
-          color: #facc15;
+          background: linear-gradient(180deg, #fff, #facc15);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
           line-height: 1; margin-bottom: 0.6rem;
           letter-spacing: -0.03em;
         }

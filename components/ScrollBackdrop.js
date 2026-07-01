@@ -49,13 +49,28 @@ const ScrollBackdrop = () => {
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100svh',
         zIndex: 0, // DOM-order stacking: backdrop comes before hero/sections → painted below
         pointerEvents: 'none',
         overflow: 'hidden',
         background: 'linear-gradient(180deg,#050510 0%, #0a1428 55%, #1a3a5c 100%)',
       }}
     >
+      {/* Mobile blur cap + aurora styles */}
+      <style>{`
+        .sb-aurora {
+          position: absolute;
+          inset: 0;
+          background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(124,58,237,0.18) 60deg, rgba(249,115,22,0.15) 120deg, transparent 180deg, rgba(167,139,250,0.12) 240deg, transparent 360deg);
+          mix-blend-mode: screen;
+          pointer-events: none;
+        }
+        @media (max-width: 768px) {
+          .sb-aurora { filter: blur(40px); }
+        }
+      `}</style>
+      {/* Conic-gradient aurora overlay */}
+      <div className="sb-aurora" />
       <svg
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid slice"

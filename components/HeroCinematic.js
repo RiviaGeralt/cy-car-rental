@@ -2,7 +2,7 @@ import React, { Suspense, useEffect, useRef, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
   Float, Stars, Environment, Lightformer,
-  RoundedBox, useGLTF,
+  RoundedBox, MeshReflectorMaterial, useGLTF,
 } from '@react-three/drei';
 import {
   motion, useScroll, useTransform, useSpring,
@@ -202,13 +202,22 @@ function Ferrari() {
 
 useGLTF.preload('/models/ferrari.glb', '/draco/');
 
-/* ─────────────────── Simple floor (replaces MeshReflectorMaterial — perf) ─────────────────── */
+/* ─────────────────── Reflector floor ─────────────────── */
 
 function SimpleFloor() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
       <planeGeometry args={[60, 60]} />
-      <meshStandardMaterial color="#06060e" metalness={0.3} roughness={0.9} />
+      <MeshReflectorMaterial
+        blur={[300, 100]}
+        resolution={1024}
+        mixBlur={1}
+        mixStrength={50}
+        roughness={0.9}
+        color="#0a0a18"
+        metalness={0.6}
+        mirror={0.55}
+      />
     </mesh>
   );
 }

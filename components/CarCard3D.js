@@ -46,12 +46,11 @@ const CarCard3D = ({ car, index, language = 'en', onInquire }) => {
       <style jsx global>{`
         .card3d {
           position: relative;
-          /* Solid translucent bg instead of backdrop-filter blur — fixes 1s freeze
-             where 5 backdrop-filter cards entering viewport simultaneously
-             cause GPU compositing thrash. Visual diff is minimal on dark bg. */
           background: linear-gradient(135deg,
             rgba(20, 22, 38, 0.55) 0%,
             rgba(10, 12, 24, 0.55) 100%);
+          backdrop-filter: blur(20px) saturate(140%);
+          -webkit-backdrop-filter: blur(20px) saturate(140%);
           border: 1px solid rgba(255,255,255,0.10);
           border-radius: 20px;
           padding: 0;

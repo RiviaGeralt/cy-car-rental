@@ -59,8 +59,8 @@ const nextConfig = {
               "img-src 'self' https: data: blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
-              // Allow analytics + drei HDRI/asset hosts + WhatsApp + pexels
-              "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://*.google-analytics.com https://raw.githack.com https://*.githack.com https://images.pexels.com https://*.pexels.com https://wa.me",
+              // Allow analytics + WhatsApp + pexels (HDRI domains removed — self-hosted only)
+              "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://*.google-analytics.com https://images.pexels.com https://*.pexels.com https://wa.me",
               "worker-src 'self' blob:",
               "media-src 'self' https: blob: data:",
               "frame-ancestors 'none'",
